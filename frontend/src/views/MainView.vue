@@ -1,0 +1,256 @@
+<script>
+import NavComponent from "@/components/NavComponent.vue";
+import axios from 'axios';
+import config from "@/config.json"
+import {endLoading, toLink} from "@/utils.js";
+import ProfileView from "@/views/ProfileView.vue";
+import CoursesView from "@/views/CoursesView.vue";
+import TournamentView from "@/views/TournamentView.vue";
+import NewsView from "@/views/NewsView.vue";
+import TradeView from "@/views/TradeView.vue";
+import ShopView from "@/views/ShopView.vue";
+import ThemeView from "@/views/ThemeView.vue";
+import LessonView from "@/views/LessonView.vue";
+import WayPaymentComponent from "@/components/WayPaymentComponent.vue";
+import SendView from "@/views/SendView.vue";
+import TopupView from "@/views/TopupView.vue";
+import SendWalletView from "@/views/SendWalletView.vue";
+import ChangeView from "@/views/ChangeView.vue";
+
+export default {
+    name: "MainView",
+    data () {
+        return {
+            queryHistory: [],
+            isGoingBack: false,
+            firstLoading: true,
+            touch: false,
+            backFuntion: false,
+        }
+    },
+    components: {
+        ChangeView,
+        SendWalletView,
+        TopupView,
+        SendView,
+        WayPaymentComponent,
+        LessonView,
+        ThemeView,
+        ShopView,
+        TradeView,
+        NewsView,
+        TournamentView,
+        CoursesView,
+        NavComponent,
+        ProfileView,
+    },
+    async mounted () {
+        document.addEventListener('gesturestart', function (e) {
+            e.preventDefault();
+        });
+        document.addEventListener('gesturechange', function (e) {
+            e.preventDefault();
+        });
+        document.addEventListener('gestureend', function (e) {
+            e.preventDefault();
+        });
+
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function(event) {
+            let now = new Date().getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+
+        window.Telegram.WebApp.setHeaderColor("secondary_bg_color");
+
+        document.addEventListener('touchstart', function(event) {
+            const activeElement = document.activeElement;
+            if ((activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')
+                && !activeElement.contains(event.target)
+                && event.target !== activeElement) {
+                if (event.target.tagName !== 'INPUT' && event.target.tagName !== 'TEXTAREA') {
+                    activeElement.blur();
+                }
+            }
+        }, { passive: true });
+
+        window.Telegram.WebApp.expand();
+        window.Telegram.WebApp.disableVerticalSwipes();
+        if (window.Telegram.WebApp.initDataUnsafe.start_param) {
+            const params = window.Telegram.WebApp.initDataUnsafe.start_param.split("_");
+            window.Telegram.WebApp.initDataUnsafe.start_param = undefined;
+
+            if (/^[0-9]+$/.test(params[1]) && Number(params[1]) >= 0)  {
+                if (params[0] === "user") toLink("user", params[1])
+                else if (["post", "event", "service"].includes(params[0])) toLink("share", params[1], params[0])
+            } else this.$router.push({ query: { s: 'profile' }});
+        }
+        else if (!this.$route.query.s) this.$router.push({ query: { s: 'profile' }});
+
+        this.fetchData();
+
+        window.Telegram.WebApp.BackButton.onClick(this.backByQuery);
+        window.backByQueryFunction = this.backByQuery;
+
+        window.addEventListener("touchstart", () => this.touch = true);
+        // window.addEventListener("touchend", () => this.touch = false);
+
+        this.hideFooter();
+
+        document.addEventListener("touchstart", async (e) => {
+            let menu = e.target.closest(".profile_menu>div") || e.target.closest(".invoice_main>div");
+            if (menu) {
+                if (menu.querySelector(".iphoneSwitcher")) return;
+                menu.style.backgroundColor = "var(--tg-theme-section-separator-color)";
+                menu.addEventListener("transitionend", () => {
+                    menu.style.backgroundColor = "";
+                }, {once: true});
+            }
+        });
+    },
+    watch: {
+        $route(to, from) {
+            clearInterval(this.$store.state.interval);
+            document.body.style.overflow = "";
+        },
+        '$route.query' (to, from) {
+            window.Telegram.WebApp.setHeaderColor("secondary_bg_color");
+            document.body.style.overflow = "";
+
+            const footer = document.querySelector('.footer');
+            if (footer) footer.style.display = '';
+
+            const dialog = document.querySelector('.dialog');
+            if (dialog) dialog.style.height = '';
+
+            const nav = document.querySelector('.nav');
+            if (nav) nav.style.paddingBottom = '';
+
+            this.$nextTick(() => this.hideFooter())
+
+            if (to.backfunction === '1') {
+                this.backFuntion = true;
+
+                let query = {...this.$route.query};
+                delete query.backfunction;
+                return this.$router.push({ query: query});
+            }
+            if (this.backFuntion === true) {
+                window.Telegram.WebApp.BackButton.offClick();
+
+                window.Telegram.WebApp.BackButton.onClick(this.backByQuery);
+                return this.backFuntion = false;
+            }
+
+            document.body.style.overflow = "";
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            if (this.isGoingBack === true) {
+                this.isGoingBack = false;
+                return;
+            }
+            if (from.s === undefined) return;
+
+            if (to.needback === "1" || to.needback == undefined || to.needback == null) {
+                this.queryHistory.push(from);
+            }
+
+            window.Telegram.WebApp.BackButton.show();
+        }
+    },
+    methods: {
+        async fetchData () {
+            axios.post(config.backend + "auth/profile", {
+                "initData": window.Telegram.WebApp.initData,
+            }).then((response) => {
+                if (this.firstLoading) {
+                    this.firstLoading = false;
+                    endLoading();
+                }
+
+                let user = response.data;
+                user.courses.forEach(course => {
+                    const lessons = course.lessons;
+                    const total = lessons.length;
+                    const completed = lessons.filter(lesson =>
+                        lesson.user_points !== null && lesson.user_points >= 50
+                    ).length;
+
+                    course.progress = total > 0 ? Math.round((completed / total) * 100) : 0;
+                });
+
+                this.$store.dispatch("updateUser", user);
+            }).catch((error) => {
+                document.querySelector(".unreg").style.display = "flex";
+                endLoading();
+            }).finally(() => {
+            });
+        },
+        backByQuery() {
+            if (this.queryHistory.length > 0) {
+                this.isGoingBack = true;
+
+                const prevQuery = this.queryHistory.pop();
+                this.$router.push({ query: prevQuery });
+
+                if (this.queryHistory.length === 0) window.Telegram.WebApp.BackButton.hide();
+            } else {
+                this.$router.push({ query: {s: 'profile'} });
+            }
+        },
+        hideFooter () {
+            document.querySelectorAll("input, textarea").forEach((el) => {
+                let footer = document.querySelector(".nav");
+                el.addEventListener("focus", () => {
+                    if (this.touch) {
+                        footer.style.opacity = "0";
+
+                        let dialog = document.querySelector(".dialog")
+                        if (dialog) dialog.style.height = "calc(100vh - 10px)";
+                        document.querySelector(".nav").style.paddingBottom = "0px"
+                    }
+                });
+                el.addEventListener("blur", () => {
+                    footer.style.opacity = "1";
+
+                    let dialog = document.querySelector(".dialog")
+                    if (dialog) dialog.style.height = "";
+
+                    document.querySelector(".nav").style.paddingBottom = "";
+                });
+            })
+        },
+    },
+    computed: {
+        name () {
+            return window.Telegram.WebApp.initDataUnsafe?.user?.first_name;
+        }
+    }
+}
+</script>
+
+<template>
+    <div class="notification_container"></div>
+    <div class="loading"><div>Добрый день, {{name}}</div></div>
+    <div class="notification_container"></div>
+    <lesson-view v-if="$route.query.s === 'lesson'" />
+    <send-view v-else-if="$route.query.s === 'send'" />
+    <topup-view v-else-if="$route.query.s === 'topup'" />
+    <change-view v-else-if="$route.query.s === 'change'" />
+    <send-wallet-view v-else-if="['sendcontact', 'sendwallet'].includes($route.query.s)" />
+    <nav-component v-else>
+        <profile-view v-if="$route.query.s === 'profile'" />
+        <courses-view v-if="$route.query.s === 'courses'" />
+        <tournament-view v-if="$route.query.s === 'tournament'" />
+        <news-view v-if="$route.query.s === 'news'" />
+        <trade-view v-if="$route.query.s === 'trade'" />
+        <shop-view v-if="$route.query.s === 'shop'" />
+        <theme-view v-if="$route.query.s === 'theme'" />
+    </nav-component>
+</template>
+
+<style scoped>
+
+</style>

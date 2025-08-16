@@ -1,0 +1,1721 @@
+@import "tailwindcss";
+
+@font-face {
+    font-family: 'SF Pro';
+    src: url('../../public/fonts/SF-Pro-Display-Regular.otf') format('opentype');
+    font-weight:400;
+}
+@font-face {
+    font-family: 'SF Pro';
+    src: url('../../public/fonts/SF-Pro-Display-Medium.otf') format('opentype');
+    font-weight: 500;
+}
+@font-face {
+    font-family: 'SF Pro';
+    src: url('../../public/fonts/SF-Pro-Display-Light.otf') format('opentype');
+    font-weight: 300;
+}
+
+:root {
+    --green-light: #787D46;
+    --grey-second: #999DA0;
+    --red: #DD1117;
+    --margin: 14px;
+    --main: #B963FF;
+    --green: #5AD000;
+    --orange: #FF7700;
+    --grey: #F4F4F4;
+    --inactive: #BEBEBE;
+    --text: #1E1E22;
+    --background: #FAFAFA;
+    --die: #FFFFFF;
+    --ready: #D2FFBD;
+    --select-answer-1: #E6C8FF;
+    --select-answer-2: #EED9FF;
+    --unselected: #D01100;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro", sans-serif;
+    outline:none;
+    border: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+::-webkit-scrollbar {
+    width: 0 !important;  /* Убираем ширину скроллбара */
+    height: 0 !important; /* Убираем высоту скроллбара */
+    display: none;        /* Полное скрытие */
+}
+
+/* Для Firefox */
+html {
+    scrollbar-width: none; /* Скрываем скроллбар */
+    -ms-overflow-style: none; /* Для IE/Edge */
+}
+
+/* Для IE/Edge */
+body {
+    -ms-overflow-style: none;
+    background-color: var(--background);
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;    /* Для Firefox */
+}
+
+.slot {
+    padding-bottom: 100px;
+    /*height: 100vh;*/
+    /*overflow: auto;*/
+}
+.nav {
+    display: flex;
+    flex-direction: row;
+    padding: 9px 21px;
+    padding-bottom: 33px;
+    justify-content: space-between;
+    background-color: var(--grey);
+    max-width:100vw;
+    min-width:100vw;
+    box-sizing: border-box;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+}
+.nav>div {
+    width: 48px;
+    height: 48px;
+    border-radius: 18px;
+    background-color: var(--die);
+    display: flex;
+    flex-direction: row;
+    padding: 12px;
+    box-shadow: 0 0 6px 0 rgba(74, 74, 74, 0.1);
+    box-sizing: border-box;
+    gap: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.nav>div.active {
+    background-color: #B963FF;
+    width: 110px;
+}
+.nav>div>svg {
+    width: 24px;
+    height: 24px;
+    margin: auto 0;
+    margin-left: auto;
+    transition: 0.2s;
+}
+.nav>div>svg path {
+    stroke: var(--main);
+}
+.nav>div.active>svg path {
+    stroke: var(--die);
+}
+.nav_text {
+    display: none;
+    font-size: 12px;
+    color: var(--die);
+    line-height: 12px;
+    margin: auto 0;
+    margin-right: auto;
+}
+.nav>div.active>.nav_text {
+    display: block;
+}
+
+.loading {
+    background-color: var(--die);
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    overflow:hidden;
+    top:0;
+    left:0;
+    display: flex;
+    z-index: 99999;
+    transition: 0.2s;
+}
+.loading>div {
+    font-weight: bold;
+    font-size: 24px;
+    color: var(--text);
+    margin: auto;
+    line-height: 24px;
+}
+
+.overlay {
+    position: fixed;
+    top:0;
+    transform:translateY(100%);
+    left:0;
+    background-color: var(--die);
+    width:100%;
+    height:100%;
+    transition: transform 0.2s;
+    overflow-y: auto;
+    z-index: 999999;
+}
+.background {
+    background-color: rgba(71, 71, 71, 0.64);
+    position: fixed;
+    top:0;
+    left:0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    opacity: 0;
+    transition: 0.2s;
+    z-index: 999;
+}
+
+
+/* ПРОФИЛЬ */
+.profile {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+.profile_background {
+    position: absolute;
+    height: 143px;
+    width: 100%;
+    top: 0;
+    left: 0;
+    border-bottom-right-radius: 16px;
+    border-bottom-left-radius: 16px;
+    overflow:hidden;
+    backdrop-filter: blur(100px);
+}
+.profile_background>img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: blur(100px);
+}
+.profile_info {
+    margin: 0 auto;
+    margin-top: 64px;
+    z-index: 1;
+}
+.profile_info_avatar {
+    margin: 0 auto;
+    width: 160px;
+    height: 160px;
+    border-radius: 100%;
+    overflow:hidden;
+    border: 2px solid var(--die);
+}
+.profile_info_avatar>img {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+}
+.profile_info_name {
+    margin-top: 8px;
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+}
+.profile_info_wallet {
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+    cursor: pointer;
+}
+.profile_info_wallet_text {
+    color: var(--inactive);
+    font-size: 16px;
+}
+.profile_info_wallet_balance {
+    font-weight: bold;
+    font-size: 36px;
+    display: flex;
+    flex-direction: row;
+    gap:10px;
+    margin: 0 auto;
+}
+.profile_info_wallet_balance>svg {
+    margin: auto 0;
+}
+.profile_info_wallet_balance>svg path {
+    width: 6px;
+    height: 12px;
+}
+.profile_info_wallet_buttons {
+    display: flex;
+    flex-direction: row;
+    margin-top: 16px;
+    gap: 24px;
+}
+.profile_info_wallet_buttons>div {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    cursor: pointer;
+}
+.profile_info_wallet_buttons>div>button {
+    height: 64px;
+    width: 64px;
+    margin: 0 auto;
+    background-color: var(--die);
+    border-radius: 18px;
+    box-shadow: 0 0 6px 0 rgba(74, 74, 74, 0.1);
+    cursor: pointer;
+}
+.profile_info_wallet_buttons>div>button>svg {
+    margin: auto;
+}
+.profile_info_wallet_buttons>div>div {
+    line-height: 22px;
+    font-size: 14px;
+}
+.profile_achievements,
+.profile_progress {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin: 11px;
+    margin-top: 48px;
+    margin-bottom: 0;
+}
+.profile_achievements_title,
+.profile_progress_title>div {
+    font-weight: bold;
+    font-size: 24px;
+    font-family: "Geologica", "SF Pro", sans-serif;
+    display: flex;
+    flex-direction: row;
+    gap:10px;
+    cursor: pointer;
+    line-height: 24px;
+}
+.profile_achievements_title>svg {
+    margin: auto 0;
+}
+.profile_achievements_title>svg path {
+    width: 6px;
+    height: 12px;
+}
+.profile_achievements_main {
+    background-color: var(--die);
+    border-radius: 18px;
+    display: flex;
+    flex-direction: row;
+    padding: 16px;
+    gap: 16px;
+}
+.profile_achievements_main>div {
+    width: 33.3%;
+    aspect-ratio: 1;
+    background-color: #D9D9D9;
+    border-radius: 2px;
+    overflow:hidden;
+}
+.profile_achievements_main>div>img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.profile_progress_title {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    cursor: auto;
+}
+.profile_progress_title>div {
+    cursor: auto;
+}
+.profile_progress_bar {
+    margin-top: 4px;
+    width: 100%;
+    height: 40px;
+    border-radius: 30px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: row;
+    position: relative;
+    padding: 4px;
+    box-sizing: border-box;
+    justify-content: space-between;
+    box-shadow: 0 0 6px 0 rgba(74, 74, 74, 0.1);
+}
+.profile_progress_bar_fill {
+    position: absolute;
+    height: 100%;
+    width: 70%;
+    background: linear-gradient(90deg, #A2AEFF 0%, #BA60FF 100%);
+    z-index: -1;
+    top:0;
+    left:0;
+    border-radius: 30px;
+}
+.profile_progress_bar_item {
+    aspect-ratio: 1;
+    background-color: var(--grey);
+    border-radius: 100%;
+    display: flex;
+    position: absolute;
+    transform: translateX(-50%);
+    height: 32px;
+    width: 32px;
+}
+.profile_progress_bar_item>svg {
+    margin: auto;
+}
+
+/* КУРСЫ */
+.courses {
+    margin: 24px 11px;
+}
+.courses_search {
+    width: 100%;
+    padding: 13px 16px;
+    display: flex;
+    flex-direction: row;
+    gap:12px;
+    background-color: var(--grey);
+    border-radius: 18px;
+    box-sizing: border-box;
+}
+.courses_search>svg {
+    width: 24px;
+    height: 24px;
+}
+.courses_search>input {
+    background-color: transparent;
+    outline: none;
+    font-size: 16px;
+    font-weight: 500;
+}
+.courses_search>input::placeholder {
+    color: var(--inactive)
+}
+.courses_title {
+    margin: 24px 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+.courses_title>div {
+    font-family: 'Geologica', 'SF Pro', sans-serif;
+    font-weight: bold;
+    font-size: 24px;
+}
+.courses_title>svg {
+    height: 24px;
+    width: 24px;
+    margin: auto 0;
+    cursor: pointer;
+}
+.courses_main {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.courses_main>div {
+    border-radius: 18px;
+    box-shadow: 0 0 6px 0 rgba(74, 74, 74, 0.1);
+    background: linear-gradient(-135deg, #FFFFFF 0%, #F7F5FF 34%, #f84040 100%);
+    padding: 16px;
+    display: flex;
+    flex-direction: row;
+    cursor: pointer;
+    position: relative;
+    overflow:hidden;
+}
+.courses_main_item_dark {
+    display: none;
+}
+.courses_main>div.inactive {
+    background: var(--die) !important;
+}
+.courses_main>div.inactive>.courses_main_item_dark {
+    display: block;
+    position: absolute;
+    top:0;
+    left:0;
+    width: 100%;
+    height: 100%;
+    z-index: 111;
+    background-color: rgba(244, 244, 244, 0.8);
+}
+.courses_main_item_info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.courses_main_item_info_name {
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 22px;
+}
+.courses_main_item_info_meta {
+    display: flex;
+    flex-direction: row;
+    gap: 13px;
+}
+.courses_main_item_info_meta_lessons {
+    margin: auto 0;
+    font-size: 16px;
+    line-height: 16px;
+}
+.courses_main_item_info_meta_level {
+    padding: 4px 0;
+    width: 96px;
+    text-align: center;
+    background-color: white;
+    border-radius: 18px;
+    line-height: 22px;
+}
+.courses_main_item_progress {
+    display: flex;
+    margin-left: auto;
+}
+.courses_main_item_progress>svg,
+.courses_main_item_progress>div,
+.tournament_closest_lesson_progress>div {
+    margin: auto 0;
+    height: 32px;
+    width: 32px;
+}
+.courses_main_item_progress>div,
+.tournament_closest_lesson_progress>div {
+    border-radius: 100%;
+    position: relative;
+    transform: rotate(180deg);
+}
+.courses_main_item_progress>div>div,
+.tournament_closest_lesson_progress>div>div {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    top: 4px;
+    left: 4px;
+    background-color: #FFB338;
+    border-radius: 100%;
+}
+
+/* ТУРНИРЫ */
+.tournament_poster {
+    /*max-width: 393px;*/
+    width: 100%;
+    /*margin: 0 auto;*/
+    height: 400px;
+    border-bottom-left-radius: 18px;
+    border-bottom-right-radius: 18px;
+    overflow:hidden;
+    position: relative;
+    /*padding: 24px 11px;*/
+    padding: 24px 0px;
+    box-sizing: border-box;
+    color: white;
+    /*background-color: #2f0064;*/
+    background: linear-gradient(0deg, #410180 0%, #2b0055 100%);
+    display: flex;
+    flex-direction: column;
+    transition: 0.2s;
+    margin-bottom: 24px;
+}
+.tournament_poster_img {
+    position: absolute !important;
+    z-index: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: unset !important;
+    top:0;
+}
+.tournament_poster_img_blur_left,
+.tournament_poster_img_blur_right {
+    position: absolute;
+    left:-10px;
+    width: 20px;
+    backdrop-filter: blur(3px);
+    height: calc(100% - 20px);
+}
+.tournament_poster_img_blur_right {
+    left: unset;
+    right: -10px;
+}
+.tournament_poster>div {
+    z-index: 2;
+    position: relative;
+    width: 393px;
+    margin: 0 auto;
+    padding: 0 11px;
+    box-sizing: border-box;
+}
+.tournament_poster_title {
+    font-family: 'Geologica', "SF Pro", sans-serif;
+    font-weight: bold;
+    font-size: 24px;
+}
+.tournament_poster_description {
+    line-height: 22px;
+    font-size: 16px;
+    margin-top: 8px !important;
+}
+.tournament_leaders {
+    margin: 0 11px;
+    margin-top: 24px;
+}
+.tournament_leaders_title {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    font-family: 'Geologica', "SF Pro", sans-serif;
+    font-weight: bold;
+    font-size: 24px;
+}
+.tournament_leaders_main {
+    position: relative;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 371px;
+    margin: 0 auto;
+    height: 315px;
+    margin-top: 24px;
+}
+.tournament_leaders_main>svg {
+    position: absolute;
+    bottom: 0;
+    left:0;
+    width: 100%;
+}
+.tournament_leaders_main>div {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    width: fit-content;
+    transform: translateX(-50%);
+    position: absolute;
+}
+.tournament_leaders_main>div>img {
+    width: 32px;
+    height: 32px;
+    background-color: #D9D9D9;
+    border: 0;
+    border-radius: 100%;
+    margin: 0 auto;
+}
+.tournament_leaders_main_name {
+    font-size: 16px;
+    font-weight: 500;
+    margin-top: 4px;
+    margin-bottom: 8px;
+}
+.tournament_leaders_main_count {
+    font-size: 14px;
+    color: #818181;
+    white-space: nowrap;
+}
+.tournament_leaders_main>div>svg {
+    width: 32px;
+    height: 19px;
+    margin: 0 auto;
+    margin-bottom: 4px;
+}
+.tournament_leaders_main_second {
+    left: calc(33.3% * 0 + (33.3% / 2));
+    bottom: 153px;
+}
+.tournament_leaders_main_first {
+    left: calc(33.3% * 1 + (33.3% / 2));
+    bottom: 212px;
+}
+.tournament_leaders_main_third {
+    left: calc(33.3% * 2 + (33.3% / 2));
+    bottom: 111px;
+}
+.tournament_you {
+    margin: 0 11px;
+    margin-top: 24px;
+    padding: 16px 0;
+    box-sizing: border-box;
+    background: linear-gradient(45deg, #E7C9FF 0%, var(--main) 100%);
+    border-radius: 18px;
+    display: flex;
+}
+.tournament_you>div {
+    display: flex;
+    margin: 0 auto;
+    gap: 10px;
+}
+.tournament_you_avatar {
+    height: 56px;
+    width: 56px;
+    border-radius: 100%;
+    overflow:hidden;
+    position: relative;
+}
+.tournament_you_avatar>img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.tournament_you_avatar>div {
+    top:50%;
+    left:50%;
+    transform: translate(-50%, -50%);
+    z-index:2;
+    font-weight: 500;
+    font-size: 16px;
+    position: absolute;
+    color:white;
+}
+.tournament_you_dark {
+    background-color: rgba(0, 0, 0, 0.34);
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top:0;
+    left:0;
+    z-index: 0 !important;
+}
+.tournament_you_info {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    color: white;
+}
+.tournament_you_info_count {
+    font-family: 'Geologica', 'SF Pro', sans-serif;
+    font-size: 24px !important;
+    font-weight: bold;
+    line-height: unset !important;
+}
+.tournament_you_info>div {
+    line-height: 22px;
+    font-size: 16px;
+}
+.tournament_list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 0 11px;
+    margin-top: 24px;
+}
+.tournament_list>div {
+    background-color: var(--die);
+    display: flex;
+    flex-direction: row;
+    box-shadow: 0 0 6px 0 rgba(74, 74, 74, 0.1);
+    border-radius: 16px;
+    padding: 12px 16px;
+}
+.tournament_list_number {
+    font-weight: bold;
+    font-size: 20px;
+    line-height: 20px;
+    margin: auto 0;
+}
+.tournament_list_user {
+    margin-left: 32px;
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+}
+.tournament_list_user>img {
+    width: 40px;
+    height: 40px;
+    margin: auto 0;
+    border-radius: 100%;
+    background-color: #D9D9D9;
+}
+.tournament_list_user>div {
+    margin: auto 0;
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 20px;
+}
+.tournament_list_count {
+    font-size: 16px;
+    line-height: 16px;
+    margin: auto 0;
+    margin-left: auto;
+    color: #818181;
+}
+.tournament_list>button {
+    margin-top: 12px;
+    border-radius: 18px;
+    background-color: var(--main);
+    font-size: 16px;
+    padding: 14px 0;
+    color: var(--die);
+    cursor: pointer;
+    transition: 0.2s;
+}
+.tournament_closest {
+    margin: 0 11px;
+    margin-top: 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+.tournament_closest_title {
+    font-family: 'Geologica', 'SF Pro', sans-serif;
+    font-weight: bold;
+    font-size: 24px;
+}
+.tournament_closest_time,
+.tournament_closest_lesson {
+    box-shadow: 0 0 6px 0 rgba(74, 74, 74, 0.1);
+    background-color: var(--die);
+    border-radius: 18px;
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    justify-content: space-between;
+    padding: 19px 16px;
+}
+.tournament_closest_time_titleDateContainer {
+    flex-direction: column ;
+    gap: 24px ;
+}
+.tournament_closest_time_title,
+.tournament_closest_lesson_info_title {
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 22px;
+}
+.tournament_closest_time_go {
+    margin: auto 0;
+}
+.tournament_closest_lesson_info_level_container {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+.tournament_closest_time_date {
+    font-size: 14px;
+    line-height: 22px;
+    display: flex;
+    flex-direction: row;
+}
+.tournament_closest_time_date>svg {
+    margin: auto 16px;
+}
+.tournament_closest_lesson_info {
+    display: flex;
+    flex-direction: column;
+}
+.tournament_closest_lesson_info_title {
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 22px;
+}
+.tournament_closest_lesson_info_level_container {
+    margin-top: 4px;
+    display: flex;
+    flex-direction: row;
+    gap: 13px;
+}
+.tournament_closest_lesson_info_level_container_count {
+    margin: auto 0;
+    font-size: 16px;
+    line-height: 16px;
+}
+.tournament_closest_lesson_info_level_container_level {
+    padding: 4px 15px;
+    background-color: #F5F5F5;
+    border-radius: 18px;
+    line-height: 22px;
+    font-size: 16px;
+}
+.tournament_closest_lesson_info_date {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+}
+.tournament_closest_lesson_info_date>svg {
+    margin: auto 0;
+}
+.tournament_closest_lesson_progress {
+    margin: auto 0;
+}
+.js-copyright-label {
+    display: none !important;
+}
+
+/* НОВОСТИ */
+.news_nav {
+    padding: 0 11px;
+    margin: 24px 0;
+    display: flex;
+    flex-direction: row;
+    gap:12px;
+    max-width: 100%;
+    overflow: auto;
+}
+.news_nav>div {
+    border-radius: 18px;
+    transition: 0.2s;
+    padding: 10px 24px;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+}
+.news_nav>div.active {
+    background-color: var(--die);
+    color: var(--main);
+    box-shadow: 0 0 6px 0 rgba(74, 74, 74, 0.1);
+}
+.news_main {
+    margin: 0 11px;
+    width: calc(100% - 22px);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.news_main>div {
+    width: 100%;
+    box-shadow: 0 0 6px 0 rgba(74, 74, 74, 0.1);
+    background-color: var(--die);
+    border-radius: 18px;
+    overflow:hidden;
+    cursor: pointer;
+}
+.news_main_photo {
+    width: 100%;
+    position: relative;
+    height: 182px;
+}
+.news_main_photo>img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.news_main_photo_category {
+    position: absolute;
+    left:16px;
+    bottom: 8px;
+    font-size: 16px;
+    color: var(--die);
+}
+.news_main_info {
+    padding: 19px 16px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+}
+.news_main_info_title {
+    font-weight: 500;
+    font-size: 20px;
+}
+.news_main_info_date {
+    color: #818181;
+    font-size: 16px;
+}
+
+
+/* ТОРГОВЛЯ */
+.trade {
+    margin: 0 11px;
+    margin-top: 24px;
+    min-height: calc(100vh - 100px - 24px);
+    display: flex;
+    flex-direction: column;
+}
+.trade_selected {
+    font-size: 16px;
+    color: #818181;
+}
+.trade_coin {
+    margin-top: 8px;
+    font-size: 24px;
+    line-height: 24px;
+    font-family: 'Geologica', 'SF Pro', sans-serif;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    flex-direction: row;
+}
+.trade_coin>svg {
+    margin: auto 0;
+    margin-left: 10px;
+}
+.trade_coin>svg path {
+    width: 6px;
+    height: 12px;
+    margin: auto 0;
+}
+.trade_currency {
+    margin-top: 24px;
+    font-size: 24px;
+    line-height: 24px;
+    font-family: 'Geologica', 'SF Pro', sans-serif;
+    font-weight: bold;
+    display: flex;
+}
+.trade_currency>span {
+    color: #AF0003;
+    font-size: 16px;
+    line-height: 24px;
+    margin: auto 0;
+    margin-left: 9px;
+    font-weight: 400;
+}
+.trade_main {
+    width: 100%;
+    height: 278px;
+    margin-top: 48px;
+    margin-bottom: 24px;
+}
+.trade_time {
+    margin-top: 24px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+.trade_time>div {
+    padding: 10px 0;
+    width: 68px;
+    border-radius: 18px;
+    text-align: center;
+    transition: 0.2s;
+    cursor: pointer;
+}
+.trade_time>div.active {
+    background-color: var(--die);
+    color: var(--main);
+    box-shadow: 0 0 6px 0 rgba(74, 74, 74, 0.1);
+}
+.trade>button {
+    margin-top: auto;
+    /*margin-bottom: 24px;*/
+    border-radius: 18px;
+    background-color: var(--main);
+    color: var(--die);
+    padding: 14px 0;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 22px;
+}
+.trade_overlay {
+    height: 85vh;
+    top: unset;
+    bottom: 0;
+    border-top-left-radius: 18px;
+    border-top-right-radius: 18px;
+    /*height: fit-content;*/
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+.trade_overlay_close_area {
+    min-height: 37px;
+    width: 100%;
+    padding-top: 12px;
+    box-sizing: border-box;
+}
+.trade_overlay_close_area>div {
+    height: 2px;
+    background-color: var(--inactive);
+    width: 68px;
+    margin: 0 auto;
+}
+.trade_overlay>.courses_search {
+    margin: 0 11px;
+    width: calc(100% - 22px);
+    margin-bottom: 24px;
+}
+.trade_overlay_main {
+    overflow-y: auto;
+    margin: 0 11px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+.trade_overlay_main>div {
+    display: flex;
+    flex-direction: row;
+    cursor: pointer;
+}
+.trade_overlay_main>div>svg,
+.trade_overlay_main>div>img {
+    height: 24px;
+    width: 24px;
+    border-radius: 100%;
+    margin: auto 0;
+    object-fit: cover;
+}
+.trade_overlay_main_info {
+    margin-left: 8px;
+    display: flex;
+    flex-direction: column;
+}
+.trade_overlay_main_info>div {
+    line-height: 22px;
+    font-size: 16px;
+    font-weight: 500;
+}
+.trade_overlay_main_info>div:last-child {
+    font-size: 14px;
+    color: var(--inactive);
+}
+.trade_overlay_main_price {
+    margin: auto 0;
+    margin-left: auto;
+    font-weight: 500;
+    font-size: 16px;
+}
+
+/* МАГАЗИН */
+.shop {
+    display: flex;
+    flex-direction: column;
+    margin: 0 11px;
+    margin-top: 24px;
+    min-height: calc(100vh - 100px - 24px);
+}
+.shop_selector {
+    padding: 4px;
+    box-sizing: border-box;
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    background-color: #F4F4F4;
+    border-radius: 18px;
+}
+.shop_selector_items {
+    cursor: pointer;
+    text-align: center;
+    width: 50%;
+    padding: 10px 0;
+    transition: 0.2s;
+    z-index: 1;
+}
+.shop_selector_items.active {
+    color: var(--main);
+}
+.shop_selector_background {
+    position: absolute;
+    top:4px;
+    left:4px;
+    width: calc(50% - 8px);
+    height: calc(100% - 8px);
+    background-color: var(--die);
+    border-radius: 14px;
+    transition: 0.2s;
+}
+.shop_selector_background.active {
+    left: 50%;
+}
+.shop_inputs {
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.shop_inputs_text {
+    font-size: 16px;
+    line-height: 22px;
+    color: var(--inactive);
+}
+.shop_inputs>div,
+.shop_inputs_main {
+    background-color: #F4F4F4;
+    border-radius: 18px;
+    padding: 14px 16px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+}
+.shop_inputs>div>input,
+.shop_inputs_main>input {
+    background-color: transparent;
+    font-size: 16px;
+    line-height: 22px;
+}
+.shop_inputs>div>input::placeholder,
+.shop_inputs_main>input::placeholder {
+    color: var(--inactive);
+}
+.shop_inputs>div>div,
+.shop_inputs_main>div{
+    font-weight: 500;
+    font-size: 16px;
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+    margin-left: auto;
+    line-height: 22px;
+}
+.shop_inputs>div>div>svg,
+.shop_inputs_main>div>svg {
+    margin: auto 0;
+}
+.shop_credit {
+    margin-top: 24px;
+}
+.shop_credit_title {
+    font-size: 16px;
+    color: var(--inactive);
+}
+.shop_credit > .trade_time {
+    margin-top: 12px !important;
+}
+.shop_credit > .trade_time > div {
+    width: 86px;
+}
+.shop > button {
+    margin-top: auto;
+    border-radius: 18px;
+    background-color: var(--main);
+    color: var(--die);
+    font-size: 16px;
+    line-height: 22px;
+    padding: 14px 0;
+    cursor: pointer;
+}
+
+
+/* ТЕМЫ */
+.theme {
+    position: relative;
+    padding: 0 11px;
+    padding-top: 24px;
+}
+.theme_background,
+.lesson_test_background {
+    z-index: -1;
+    position: absolute;
+    top:0;
+    left:0;
+    width: 100%;
+    height: 201px;
+}
+.theme_level {
+    font-weight: 500;
+    font-size: 16px;
+    padding: 4px 12px;
+    background-color: var(--die);
+    border-radius: 18px;
+    display: flex;
+    width: fit-content;
+    line-height: 22px;
+}
+.theme_title {
+    margin-top: 24px;
+    font-family: 'Geologica', 'SF Pro', sans-serif;
+    font-weight: bold;
+    font-size: 24px;
+}
+.theme_description {
+    margin-top: 8px;
+    font-size: 16px;
+    line-height: 22px;
+}
+.theme_progress {
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.theme_progress_title {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+.theme_progress_title>div {
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 22px;
+    color: var(--inactive);
+}
+.theme_progress_title>div:last-child {
+    color: var(--text)
+}
+.theme_progress_bar {
+    width: 100%;
+    height: 40px;
+    padding: 4px;
+    border-radius: 30px;
+    background-color: var(--die);
+    box-sizing: border-box;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 6px 0 rgba(74, 74, 74, 0.1);
+}
+.theme_progress_bar_fill {
+    position: absolute;
+    top:0;
+    left: 0;
+    height: 100%;
+    width: 30%;
+    background: linear-gradient(90deg, #A2AEFF 0%, #BA60FF 100%);
+    border-radius: 30px;
+    transition: 0.2s;
+}
+.theme_lessons {
+    margin-top: 48px;
+}
+.theme_lessons_title {
+    font-family: 'Geologica', 'SF Pro', sans-serif;
+    font-weight: bold;
+    font-size: 24px;
+    line-height: 22px;
+}
+.theme_lessons_main {
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.lesson {
+    display: flex;
+    flex-direction: row;
+    padding: 16px;
+    background-color: var(--die);
+    border-radius: 18px;
+    cursor: pointer;
+    box-shadow: 0 0 6px 0 rgba(74, 74, 74, 0.1);
+}
+.lessons_main_info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.lessons_main_info_title {
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 22px;
+}
+.lessons_main_info_count {
+    font-size: 16px;
+    line-height: 22px;
+    color: #818181;
+}
+.lessons_main_info_closest {
+    margin-bottom: 8px;
+    line-height: 22px;
+    font-size: 16px;
+    color: var(--inactive);
+}
+.lessons_main_status {
+    margin-left: auto;
+    display: flex;
+    flex-direction: row;
+}
+.lessons_main_status_countOpen {
+    font-size: 16px;
+    line-height: 16px;
+    margin: auto 0;
+    margin-right: 14px;
+}
+.lessons_main_status>svg {
+    margin: auto 0;
+    height: 32px;
+    width: 32px;
+}
+.theme_exam {
+    margin-top: 52px;
+}
+
+
+/* ТЕСТ ТЕОРИЯ */
+.lesson_theory {
+    margin: 24px 11px;
+    min-height: calc(100vh - 24px * 2);
+    display: flex;
+    flex-direction: column;
+    transition: 0.2s;
+}
+.lesson_theory_title {
+    font-family: 'Geologica', 'SF Pro', sans-serif;
+    font-weight: bold;
+    font-size: 24px;
+    line-height: 22px;
+}
+.lesson_theory_count {
+    margin-top: 8px;
+    font-size: 16px;
+    line-height: 22px;
+    color: #818181;
+}
+.lesson_theory_description {
+    margin-top: 24px;
+    line-height: 22px;
+    font-size: 16px;
+}
+.lesson_theory_videos {
+    margin-top: 48px;
+}
+.lesson_theory_videos_title {
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 22px;
+    color: var(--inactive);
+}
+.lesson_theory_videos_list {
+    display: flex;
+    flex-direction: row;
+    margin-top: 12px;
+    gap: 22px;
+}
+.lesson_theory_videos_list>div {
+    width: calc(33% - 22px * 2 / 3);
+    background-color: var(--die);
+    border-radius: 18px;
+    box-shadow: 0 0 6px 0 rgba(74, 74, 74, 0.1);
+    aspect-ratio: 1/1;
+    display: flex;
+    cursor: pointer;
+}
+.lesson_theory_videos_list>div>svg {
+    margin: auto;
+    height: 29.36%;
+    aspect-ratio: 1/1;
+}
+.lesson_theory>button,
+.lesson_test_question_container>button,
+.lesson_test_result>button {
+    margin-top: auto;
+    margin-bottom: 9px;
+    padding: 14px 0;
+    font-weight: 500;
+    font-size: 17px;
+    border-radius: 12px;
+    background-color: var(--main);
+    color: var(--die);
+    cursor: pointer;
+}
+
+
+/* ТЕСТ УРОКОВ */
+.lesson_test {
+    display: flex;
+    flex-direction: column;
+    margin: 24px 11px;
+    min-height: calc(100vh - 24px * 2);
+    transition: 0.2s;
+}
+.lesson_test_title {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    font-family: 'Geologica', 'SF Pro', sans-serif;
+    font-weight: bold;
+    font-size: 24px;
+}
+.lesson_test_description {
+    line-height: 22px;
+    font-size: 16px;
+    margin-top: 8px;
+}
+.lesson_test > .theme_progress_bar {
+    margin-top: 24px;
+}
+.lesson_test_question {
+    margin-top: 48px;
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 22px;
+}
+.lesson_test_answers {
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+.lesson_test_answers>div {
+    width: 100%;
+    border-radius: 18px;
+    background-color: var(--die);
+    box-shadow: 0 0 6px 0 rgba(74, 74, 74, 0.1);
+    padding: 16px;
+    box-sizing: border-box;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 22px;
+    transition: 0.2s;
+    outline: none;
+}
+.lesson_test_answers>div.active {
+    outline: 1px solid var(--main);
+}
+.lesson_test_question_container,
+.lesson_test_result {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+.lesson_test_result_title {
+    text-align: center;
+    font-weight: bold;
+    font-size: 64px;
+    font-family: 'Geologica', 'SF Pro', sans-serif;
+    display: flex;
+    flex-direction: row;
+    margin: 0 auto;
+    margin-top: auto;
+}
+.lesson_test_result_title>span {
+    font-size: 48px;
+    font-weight: bold;
+    margin: auto 0;
+    margin-left: 12px;
+}
+.lesson_test_result_description {
+    margin-top: 4px;
+    text-align: center;
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 22px;
+    margin-bottom: auto;
+}
+.lesson_test_background {
+    background: linear-gradient(0deg, transparent 0%, rgba(238, 80, 83, 0.68) 100%);
+}
+.lesson_test_background.active {
+    background: linear-gradient(0deg, transparent 0%, rgba(110, 232, 72, 0.75) 100%);
+}
+.lesson_test_result_svg {
+    width: 100px;
+    height: 100px;
+    margin: auto;
+    margin-bottom: 0;
+}
+
+
+/* ОТПРАВИТЬ */
+.send, .topup {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin: 24px 11px;
+}
+
+/* СПОСОБ ОПЛАТЫ */
+.wayPayment {
+    width: 100%;
+    background-color: var(--die);
+    border-radius: 18px;
+    box-shadow: 0 0 6px 0 rgba(74, 74, 74, 0.1);
+    padding: 16px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    cursor: pointer;
+}
+.wayPayment_img {
+    height: 48px;
+    width: 48px;
+    border-radius: 18px;
+    background: linear-gradient(90deg, #A2AEFF 0%, #BA60FF 100%);
+    display: flex;
+}
+.wayPayment_img>svg {
+    margin: auto;
+}
+.wayPayment_info {
+    margin-left: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.wayPayment_title {
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 22px;
+}
+.wayPayment_description {
+    font-size: 16px;
+    color: var(--inactive);
+    line-height: 22px;
+}
+.wayPayment>svg {
+    margin: auto 0;
+    margin-left: auto;
+}
+
+
+
+/* УВЕДОМЛЕНИЯ */
+.notification_container {
+    display:flex;
+    flex-direction:column-reverse;
+    position:fixed;
+    left:50%;
+    transform: translateX(-50%);
+    z-index:999999999;
+}
+.notification_container>div {
+    transition: none;
+    visibility: hidden;
+    height: 0;
+}
+.notification {
+    width:250px;
+    display:flex;
+    flex-direction:row;
+    padding:10px;
+    border-radius:10px;
+    color:white !important;
+    column-gap:10px;
+    margin-top:10px;
+}
+.notification.success {
+    background-color: #4caf50;
+}
+.notification.error {
+    background-color: #f44336;
+}
+.notification>i {
+    font-size:24px;
+    margin:auto 0;
+    color:white !important;
+}
+.notification>div {
+    text-align:left;
+    margin:auto 0;
+    font-size:14px;
+    font-weight:500;
+    color:white !important;
+}
+
+/* ОТПРАВИТЬ ПО КОШЕЛЬКУ */
+.sendWallet {
+    min-height: calc(100vh - 48px);
+    display: flex;
+    flex-direction: column;
+    margin: 24px 11px;
+    box-sizing: border-box;
+}
+.sendWallet_currency {
+    display: flex;
+    flex-direction: row;
+    background-color: var(--die);
+    -webkit-border-radius: 16px;
+    -moz-border-radius: 16px;
+    border-radius: 16px;
+    box-shadow: 0 0 6px 0 rgba(74, 74, 74, 0.1);
+    padding: 16px 15px;
+    margin-bottom: 12px;
+    cursor: pointer;
+}
+.sendWallet_currency>img {
+    height: 40px;
+    width: 40px;
+    margin: auto 0;
+}
+.sendWallet_currency_info {
+    margin-left: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.sendWallet_currency_info>div {
+    line-height: 22px;
+    font-size: 16px;
+}
+.sendWallet_currency_info_name {
+    font-weight: 500;
+}
+.sendWallet_currency_info_count {
+    font-weight: 400;
+    color: var(--inactive);
+}
+.sendWallet_currency_price {
+    margin: auto 0;
+    margin-left: auto;
+    font-weight: 500;
+    line-height: 16px;
+    font-size: 16px;
+}
+.sendWallet_currency>svg {
+    margin: auto 0;
+    margin-left: 36px;
+}
+.sendWallet>input {
+    margin-top: 12px;
+    padding: 14px 16px;
+    width: 100%;
+    box-sizing: border-box;
+    background-color: var(--grey);
+    -webkit-border-radius: 18px;
+    -moz-border-radius: 18px;
+    border-radius: 18px;
+}
+.sendWallet>input::placeholder {
+    color: var(--inactive);
+}
+.sendWallet>button {
+    margin-bottom: 12px;
+    margin-top: auto;
+    -webkit-border-radius: 12px;
+    -moz-border-radius: 12px;
+    border-radius: 12px;
+    background-color: var(--main);
+    padding: 14px 0;
+    font-weight: 500;
+    color: white;
+    font-size: 17px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.sendWallet>button>svg {
+    height: 17px;
+    aspect-ratio: 1/1;
+}
+.sendWallet>button.active {
+    background-color: #8145b1;
+}
+
+
+/* ОБМЕН */
+.change {
+    margin: 24px 11px;
+    min-height: calc(100vh - 48px);
+    display: flex;
+    flex-direction: column;
+}
+.change_main {
+    display: flex;
+    flex-direction: column;
+    gap:36px;
+    position: relative;
+}
+.change_main>div {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.change>button {
+    padding: 14px 0;
+    font-size: 17px;
+    line-height: 22px;
+    color:white;
+    background-color: var(--main);
+    border-radius: 12px;
+    width: 100%;
+    margin-top: auto;
+    cursor: pointer;
+}
+.change_main>svg {
+    position: absolute;
+    bottom: 69px;
+    left:50%;
+    transform: translateX(-50%);
+    cursor: pointer;
+    transition: 0.2s;
+}
