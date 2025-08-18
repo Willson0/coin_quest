@@ -51,7 +51,7 @@ export default {
         },
         async saveEdit(idx) {
             let fd = new FormData();
-            fd.append('image', this.editForm.file);
+            if (this.editForm.file) fd.append('image', this.editForm.file);
             fd.append('progress', this.editForm.progress);
 
             await axios.post(config.backend + 'admin/achievements/' + idx, fd, {withCredentials: true}).then((response) => {
@@ -159,13 +159,7 @@ export default {
                 </td>
                 <td>
             <span v-if="!isEditing(idx)">
-              <div class="progress-bar-bg">
-                <div
-                    class="progress-bar"
-                    :style="{ width: achievement.progress + '%'}"
-                ></div>
-              </div>
-              {{ achievement.progress }}%
+              {{ achievement.progress }} уроков
             </span>
                     <input
                         v-else

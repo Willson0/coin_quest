@@ -16,6 +16,12 @@ import SendView from "@/views/SendView.vue";
 import TopupView from "@/views/TopupView.vue";
 import SendWalletView from "@/views/SendWalletView.vue";
 import ChangeView from "@/views/ChangeView.vue";
+import SendContactView from "@/views/SendContactView.vue";
+import TopupCardView from "@/views/TopupCardView.vue";
+import AchievementsView from "@/views/AchievementsView.vue";
+import SupportView from "@/views/SupportView.vue";
+import TopupWalletView from "@/views/TopupWalletView.vue";
+import TopupP2PMarket from "@/views/TopupP2PMarketView.vue";
 
 export default {
     name: "MainView",
@@ -25,10 +31,15 @@ export default {
             isGoingBack: false,
             firstLoading: true,
             touch: false,
-            backFuntion: false,
         }
     },
     components: {
+        TopupP2PMarket,
+        TopupWalletView,
+        SupportView,
+        AchievementsView,
+        TopupCardView,
+        SendContactView,
         ChangeView,
         SendWalletView,
         TopupView,
@@ -131,20 +142,6 @@ export default {
 
             this.$nextTick(() => this.hideFooter())
 
-            if (to.backfunction === '1') {
-                this.backFuntion = true;
-
-                let query = {...this.$route.query};
-                delete query.backfunction;
-                return this.$router.push({ query: query});
-            }
-            if (this.backFuntion === true) {
-                window.Telegram.WebApp.BackButton.offClick();
-
-                window.Telegram.WebApp.BackButton.onClick(this.backByQuery);
-                return this.backFuntion = false;
-            }
-
             document.body.style.overflow = "";
             window.scrollTo({ top: 0, behavior: 'smooth' });
             if (this.isGoingBack === true) {
@@ -175,7 +172,7 @@ export default {
                     const lessons = course.lessons;
                     const total = lessons.length;
                     const completed = lessons.filter(lesson =>
-                        lesson.user_points !== null && lesson.user_points >= 50
+                        lesson.user_points !== null && lesson.user_points >= -1
                     ).length;
 
                     course.progress = total > 0 ? Math.round((completed / total) * 100) : 0;
@@ -201,26 +198,28 @@ export default {
             }
         },
         hideFooter () {
-            document.querySelectorAll("input, textarea").forEach((el) => {
-                let footer = document.querySelector(".nav");
-                el.addEventListener("focus", () => {
-                    if (this.touch) {
-                        footer.style.opacity = "0";
+            let footer = document.querySelector(".nav");
+            if (footer) {
+                document.querySelectorAll("input, textarea").forEach((el) => {
+                    el.addEventListener("focus", () => {
+                        if (this.touch) {
+                            footer.style.opacity = "0";
+
+                            let dialog = document.querySelector(".dialog")
+                            if (dialog) dialog.style.height = "calc(100vh - 10px)";
+                            document.querySelector(".nav").style.paddingBottom = "0px"
+                        }
+                    });
+                    el.addEventListener("blur", () => {
+                        footer.style.opacity = "1";
 
                         let dialog = document.querySelector(".dialog")
-                        if (dialog) dialog.style.height = "calc(100vh - 10px)";
-                        document.querySelector(".nav").style.paddingBottom = "0px"
-                    }
-                });
-                el.addEventListener("blur", () => {
-                    footer.style.opacity = "1";
+                        if (dialog) dialog.style.height = "";
 
-                    let dialog = document.querySelector(".dialog")
-                    if (dialog) dialog.style.height = "";
-
-                    document.querySelector(".nav").style.paddingBottom = "";
-                });
-            })
+                        document.querySelector(".nav").style.paddingBottom = "";
+                    });
+                })
+            }
         },
     },
     computed: {
@@ -239,7 +238,13 @@ export default {
     <send-view v-else-if="$route.query.s === 'send'" />
     <topup-view v-else-if="$route.query.s === 'topup'" />
     <change-view v-else-if="$route.query.s === 'change'" />
-    <send-wallet-view v-else-if="['sendcontact', 'sendwallet'].includes($route.query.s)" />
+    <send-wallet-view v-else-if="$route.query.s === 'sendwallet'" />
+    <send-contact-view v-else-if="$route.query.s === 'sendcontact'" />
+    <topup-card-view v-else-if="$route.query.s === 'topupcard'" />
+    <topup-wallet-view v-else-if="$route.query.s === 'topupwallet'" />
+    <achievements-view v-else-if="$route.query.s === 'achievements'" />
+    <topup-p2-p-market v-else-if="$route.query.s === 'topup_p2p_market'" />
+    <support-view v-else-if="$route.query.s === 'support'" />
     <nav-component v-else>
         <profile-view v-if="$route.query.s === 'profile'" />
         <courses-view v-if="$route.query.s === 'courses'" />

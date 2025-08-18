@@ -1,12 +1,13 @@
 <script>
 import CryptoOverlay from "@/components/CryptoOverlay.vue";
-import {notify, openOverlay, toLink} from "@/utils.js";
+import {notify, openOverlay, showSuccess, toLink} from "@/utils.js";
 import axios from "axios";
 import config from "@/config.json";
+import SuccessComponent from "@/components/SuccessComponent.vue";
 
 export default {
     name: "SendWalletView",
-    components: {CryptoOverlay},
+    components: {SuccessComponent, CryptoOverlay},
     data () {
         return {
             selectedCurrency: 0,
@@ -29,14 +30,16 @@ export default {
             this.isLoading = true;
             await axios.post(config.backend + "trade/send", {
                 initData: window.Telegram.WebApp.initData,
+                wallet: this.wallet,
                 currency: this.user.currenciesData[this.selectedCurrency].coingeckoId,
                 amount: this.amount,
             }).then((response) => {
                 let newUser = {...this.user, crypto: response.data.crypto};
                 this.$store.dispatch("updateUser", newUser);
 
-                notify("Успешно отправлено!");
-                toLink('profile');
+                showSuccess();
+            }).catch((error) => {
+                notify(error.response.data.message, 1)
             }).finally(() => {
                 this.isLoading = false;
             })
@@ -68,6 +71,7 @@ export default {
         <input type="number" v-model="amount" placeholder="Введите сумму">
         <button @click="sendData" :class="{'active': isLoading}">Отправить</button>
     </div>
+    <success-component title="Отправка совершена" :description="`В течение 15 минут ${this.amount} ${user.currenciesData?.[selectedCurrency].symbol} будет начислен на счет`" back-link="send"/>
 </template>
 
 <style scoped>

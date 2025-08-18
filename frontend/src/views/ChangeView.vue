@@ -1,12 +1,13 @@
 <script>
-import {notify, openOverlay} from "@/utils.js";
+import {notify, openOverlay, showSuccess} from "@/utils.js";
 import CryptoOverlay from "@/components/CryptoOverlay.vue";
 import axios from "axios";
 import config from "@/config.json";
+import SuccessComponent from "@/components/SuccessComponent.vue";
 
 export default {
     name: "ChangeView",
-    components: {CryptoOverlay},
+    components: {SuccessComponent, CryptoOverlay},
     data () {
         return {
             firstCoin: 0,
@@ -60,7 +61,7 @@ export default {
                 newUser.crypto = response.data.crypto;
                 this.$store.dispatch("updateUser", newUser);
 
-                notify('Успешно', 0);
+                showSuccess();
             }).catch((error) => {
                 if (error.response) {
                     notify(error.response.data.message, 1);
@@ -112,6 +113,7 @@ export default {
         </div>
         <button @click="sendData">Провести сделку</button>
     </div>
+    <success-component title="Обмен совершен" back-link="profile"/>
 </template>
 
 <style scoped>

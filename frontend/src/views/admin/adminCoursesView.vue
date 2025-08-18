@@ -430,6 +430,7 @@ header {
 
 .container {
     padding: 16px 22px 28px 22px;
+    max-width: unset !important;
 }
 
 .grid {

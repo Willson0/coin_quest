@@ -20,6 +20,10 @@ export default {
         link: {
             type: String,
             default: ""
+        },
+        background: {
+            type: String,
+            default: ""
         }
     }
 }
@@ -27,7 +31,7 @@ export default {
 
 <template>
     <div class="wayPayment" @click="toLink(link)">
-        <div class="wayPayment_img" v-html="svg"></div>
+        <div class="wayPayment_img" v-html="svg" :style="{'background': background}"></div>
         <div class="wayPayment_info">
             <div class="wayPayment_title">{{ title }}</div>
             <div class="wayPayment_description">{{ description }}</div>

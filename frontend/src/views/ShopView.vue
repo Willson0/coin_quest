@@ -1,12 +1,13 @@
 <script>
-import {closeOverlay, notify, openOverlay, showOverlay} from "@/utils.js";
+import {closeOverlay, notify, openOverlay, showOverlay, showSuccess} from "@/utils.js";
 import CryptoOverlay from "@/components/CryptoOverlay.vue";
 import axios from "axios";
 import config from "@/config.json";
+import SuccessComponent from "@/components/SuccessComponent.vue";
 
 export default {
     name: "ShopView",
-    components: {CryptoOverlay},
+    components: {SuccessComponent, CryptoOverlay},
     mounted () {
     },
     methods: {
@@ -33,7 +34,7 @@ export default {
                 newUser.crypto = response.data.crypto;
                 this.$store.dispatch("updateUser", newUser);
 
-                notify('Успешно', 0);
+                showSuccess();
             }).catch((error) => {
                 if (error.response) {
                     notify(error.response.data.message, 1);
@@ -115,6 +116,7 @@ export default {
         </div>
         <button @click="sendData">Купить</button>
     </div>
+    <success-component :title="isSale ? 'Успешная продажа' : 'Успешная покупка'" :description="isSale ? '' : `В течение 15 минут ${firstCoin} ${coin.symbol} будет начислен`" back-link="profile"/>
 </template>
 
 <style scoped>

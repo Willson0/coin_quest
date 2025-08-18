@@ -11,6 +11,7 @@ export default {
             lessonNumber: -1,
             result: null,
             isCourseRestart: false,
+            realResult: null,
         }
     },
     methods: {
@@ -32,31 +33,32 @@ export default {
                 answers: this.answers
             }).then((response) => {
                 this.lessonNumber = this.lesson?.questions.length;
-                this.result = response.data.points;
-                endLoading("loading_lesson");
 
-                // let newUser = {...this.user};
-                // newUser.courses.find((course) => course.id === this.lesson.course_id)
-                //     .lessons.find((lesson) => lesson.id === this.lesson.id).user_points = this.result;
-                // newUser.courses.find((course) => course.id === this.lesson.course_id)
-                //     .lessons.find((lesson) => lesson.id === this.lesson.id).user_count_tries += 1;
-                //
-                if (this.result < 50 && newUser.courses.find((course) => course.id === this.lesson.course_id)
+                let realResult = response.data.points;
+                this.realResult = realResult;
+                this.result = 0;
+                endLoading("loading_lesson");
+                setTimeout(() => {
+                    var interval = setInterval(() => {
+                        if (realResult === this.result) {
+                            clearInterval(interval);
+                            let title = this.$refs.endPoint;
+                            title.parentNode.style.transform = "translate(-50%, -50%)";
+                            title.querySelector("span").style.opacity = "1";
+
+                            document.querySelectorAll('.lesson_test_result>button, .lesson_test_result_description').forEach((item) => {
+                                item.style.opacity = "1";
+                            });
+                            if (this.$refs.end_svg) this.$refs.end_svg.style.opacity = "1";
+                        }
+                        else this.result += 1;
+                    }, 10);
+                }, 200);
+
+                if (this.lesson.count_tries > 0 && this.result < 50 && this.user.courses.find((course) => course.id === this.lesson.course_id)
                     .lessons.find((lesson) => lesson.id === this.lesson.id).user_count_tries === this.lesson.count_tries) {
                     this.isCourseRestart = true;
                 }
-                // else this.isCourseRestart = false;
-                // newUser.courses.forEach(course => {
-                //     const lessons = course.lessons;
-                //     const total = lessons.length;
-                //     const completed = lessons.filter(lesson =>
-                //         lesson.user_points !== null && lesson.user_points >= 50
-                //     ).length;
-                //
-                //     course.progress = total > 0 ? Math.round((completed / total) * 100) : 0;
-                // });
-
-                // this.$store.dispatch("updateUser", newUser);
                 axios.post(config.backend + "auth/profile", {
                     "initData": window.Telegram.WebApp.initData,
                 }).then((response) => {
@@ -65,7 +67,8 @@ export default {
                         const lessons = course.lessons;
                         const total = lessons.length;
                         const completed = lessons.filter(lesson =>
-                            lesson.user_points !== null && lesson.user_points >= 50
+                            // lesson.user_points !== null && lesson.user_points >= 50
+                            lesson.user_points !== null
                         ).length;
                         course.progress = total > 0 ? Math.round((completed / total) * 100) : 0;
                     });
@@ -166,17 +169,17 @@ export default {
         <button @click="lessonNumber = 0">Я все изучил</button>
     </div>
     <div class="lesson_test" style="display: none" ref="test">
-        <div class="lesson_test_background" v-if="lesson.count_tries > 0 && result !== null" :class="{'active': result >= 50}"></div>
-        <div class="lesson_test_title">
-            <div>{{ lesson.count_tries > 0 ? 'Экзамен' : 'Тест по теме урока'}}</div>
-            <div>{{ Math.min(lessonNumber+1, lesson.questions?.length) }} / {{ lesson.questions?.length }}</div>
-        </div>
-        <div class="lesson_test_description" v-if="lesson.count_tries > 0">Наберите больше 50 баллов для прохождения теста. У вас есть 2 попытки, после двух неудач пройдите всю тему заново</div>
-        <div class="theme_progress_bar">
-            <div class="theme_progress_bar_fill" :style="{'width': (lesson.questions?.length === 0 ? 100 : Math.round(((lessonNumber+1) / lesson.questions?.length) * 100)) + '%'}"></div>
-            <div class="theme_progress_bar_locked"></div>
-        </div>
+        <div class="lesson_test_background" v-if="lesson.count_tries > 0 && result !== null" :class="{'active': realResult >= 50}"></div>
         <div class="lesson_test_question_container" v-if="lessonNumber >= 0 && lessonNumber !== lesson.questions?.length">
+            <div class="lesson_test_title">
+                <div>{{ lesson.count_tries > 0 ? 'Экзамен' : 'Тест по теме урока'}}</div>
+                <div>{{ Math.min(lessonNumber+1, lesson.questions?.length) }} / {{ lesson.questions?.length }}</div>
+            </div>
+            <div class="lesson_test_description" v-if="lesson.count_tries > 0">Наберите больше 50 баллов для прохождения теста. У вас есть 2 попытки, после двух неудач пройдите всю тему заново</div>
+            <div class="theme_progress_bar">
+                <div class="theme_progress_bar_fill" :style="{'width': (lesson.questions?.length === 0 ? 100 : Math.round(((lessonNumber+1) / lesson.questions?.length) * 100)) + '%'}"></div>
+                <div class="theme_progress_bar_locked"></div>
+            </div>
             <div class="lesson_test_question">{{ lesson.questions[lessonNumber].question }}</div>
             <div class="lesson_test_answers">
                 <div v-for="(answ, key) in lesson.questions?.[lessonNumber]?.answers"
@@ -187,23 +190,26 @@ export default {
             <button @click="nextQuestion()">{{ lessonNumber === lesson.questions?.length - 1 ? 'Узнать результат' : 'Ответить' }}</button>
         </div>
         <div class="lesson_test_result" v-else-if="lessonNumber === lesson.questions?.length">
-            <div v-if="lesson.count_tries > 0" class="lesson_test_result_svg">
-                <svg v-if="result < 50" xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100" fill="none">
-                    <circle cx="50" cy="50" r="50" fill="#ED8789"/>
-                    <path d="M36 36L64 64" stroke="#AF0003" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M64 36L36 64" stroke="#AF0003" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                <svg v-else xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100" fill="none">
-                    <circle cx="50" cy="50" r="50" fill="#99E981"/>
-                    <path d="M63.9999 36L48.3338 64L36 51.2727" stroke="#1E8100" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
+            <div class="lesson_test_result_title_container">
+                <div ref="end_svg" style="opacity: 0" v-if="lesson.count_tries > 0" class="lesson_test_result_svg">
+                    <svg v-if="realResult < 50" xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100" fill="none">
+                        <circle cx="50" cy="50" r="50" fill="#ED8789"/>
+                        <path d="M36 36L64 64" stroke="#AF0003" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M64 36L36 64" stroke="#AF0003" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <svg v-else xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100" fill="none">
+                        <circle cx="50" cy="50" r="50" fill="#99E981"/>
+                        <path d="M63.9999 36L48.3338 64L36 51.2727" stroke="#1E8100" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+
+                <div ref="endPoint" class="lesson_test_result_title">{{ result }}<span style="opacity:0;">Баллов</span></div>
+                <div style="opacity:0;" class="lesson_test_result_description" v-if="lesson.count_tries === 0">Результат засчитан!</div>
+                <div class="lesson_test_result_description" style="opacity:0;"  v-else>{{ result >= 50 ? 'Вы успешно прошли тему!' : isCourseRestart ? 'Придется пройти тему заново!' : 'У вас есть еще одна попытка' }}</div>
             </div>
-            <div class="lesson_test_result_title">{{ result }}<span>Баллов</span></div>
-            <div class="lesson_test_result_description" v-if="lesson.count_tries === 0">{{ result >= 50 ? 'Результат засчитан' : 'Вы не прошли тест' }}</div>
-            <div class="lesson_test_result_description" v-else>{{ result >= 50 ? 'Вы успешно прошли тему!' : isCourseRestart ? 'Придется пройти тему заново!' : 'У вас есть еще одна попытка' }}</div>
-            <button v-if="isCourseRestart" @click="toLink('theme', lesson.course_id)">Начать курс заново</button>
-            <button v-else-if="result < 50" @click="restart()">Пройти еще раз</button>
-            <button v-else @click="toLink('theme', lesson.course_id)">Вернуться к курсу</button>
+            <button v-if="isCourseRestart" style="opacity:0;" @click="toLink('theme', lesson.course_id)">Начать курс заново</button>
+            <button v-else-if="result < 50" style="opacity:0;" @click="restart()">Пройти еще раз</button>
+            <button v-else style="opacity:0;" @click="toLink('theme', lesson.course_id)">Вернуться</button>
         </div>
     </div>
 </template>

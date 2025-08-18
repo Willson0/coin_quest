@@ -347,7 +347,10 @@ class utils
                 $hasNotPassed = Lesson::where('course_id', $course->id)
                     ->whereDoesntHave('userLessons', function($q) use ($user) {
                         $q->where('user_id', $user->id)
-                            ->where('points', '>', 50);
+                            ->where(function($query) {
+                                $query->whereRaw('lessons.count_tries > 0 and user_lessons.points >= 50')
+                                    ->orWhereRaw('lessons.count_tries <= 0 and user_lessons.points > -1');
+                            });
                     })
                     ->exists();
                 if ($hasNotPassed) abort (403, "Предыдущий курс не пройден!");
@@ -356,7 +359,10 @@ class utils
             $hasNotPassed = Lesson::where('course_id', $course->id)->where("number", "<", $lesson->number)
                 ->whereDoesntHave('userLessons', function($q) use ($user) {
                     $q->where('user_id', $user->id)
-                        ->where('points', '>=', 50);
+                        ->where(function($query) {
+                            $query->whereRaw('lessons.count_tries > 0 and user_lessons.points >= 50')
+                                ->orWhereRaw('lessons.count_tries <= 0 and user_lessons.points > -1');
+                        });
                 })
                 ->exists();
             if ($hasNotPassed) abort (403, "Предыдущие уроки в этом курсе не пройдены!");

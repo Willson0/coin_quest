@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\TradeBuyCardRequest;
+use App\Http\Requests\TradeSendRequest;
 use App\Models\Currency;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -68,10 +70,21 @@ class TradeController extends Controller
         return response()->json(["crypto" => $crypto]);
     }
 
-    public function send (Request $request) {
-        if (!$request->has("currency") || !$request->has("amount")) abort (404, "Недостаточно данных для отправки");
+    public function send (TradeSendRequest $request) {
         $user = User::where("telegram_id", $request["initData"]["user"]["id"])->firstOrFail();
         $user->crypto = json_decode($user->crypto, true);
+
+        if ($request->isTelegram) $isTelegram = true;
+        else $isTelegram = false;
+
+        if ($isTelegram) {
+            $recipient = User::where("username", $request->wallet)->orWhere("telegram_id", $request->wallet)->first();
+            if (!$recipient) abort (404, "Пользователь с таким юзернеймом не зарегистрирован");
+        } else {
+            $recipient = User::where("wallet", $request->wallet)->first();
+            if (!$recipient) abort (404, "Пользователя с таким кошельком не существует");
+        }
+        if ($recipient->id == $user->id) abort (404, "Нельзя отправить деньги самому себе");
 
         if (!isset($user->crypto[$request->currency]) || $user->crypto[$request->currency] < $request->amount)
             abort (404, "Недостаточно средств для отправки");
@@ -80,7 +93,26 @@ class TradeController extends Controller
         $crypto[$request->currency] -= $request->amount;
         $user->crypto = $crypto;
 
+        $recipient_crypto = json_decode($recipient->crypto, true);
+        if (!isset($recipient_crypto[$request->currency])) $recipient_crypto[$request->currency] = 0;
+        $recipient_crypto[$request->currency] += $request->amount;
+        $recipient->crypto = $recipient_crypto;
+
         $user->save();
+        $recipient->save();
+        return response()->json(["crypto" => $user->crypto]);
+    }
+
+    public function buyCard (TradeBuyCardRequest $request) {
+        $user = User::where("telegram_id", $request["initData"]["user"]["id"])->firstOrFail();
+
+        $crypto = json_decode($user->crypto, true);
+        if (!isset($crypto[$request->currency])) $crypto[$request->currency] = 0;
+        $crypto[$request->currency] += $request->amount;
+        $user->crypto = $crypto;
+
+        $user->save();
+
         return response()->json(["crypto" => $user->crypto]);
     }
 }

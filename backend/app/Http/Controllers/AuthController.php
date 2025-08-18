@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Achievements;
 use App\Models\Course;
 use App\Models\Currency;
+use App\Models\FiatCurrency;
 use App\Models\Lesson;
 use App\Models\News;
 use App\Models\NewsCategory;
@@ -22,18 +23,26 @@ class AuthController extends Controller
     public function profile (Request $request) {
         $user = User::where("telegram_id", $request["initData"]["user"]["id"])->first();
         if (!$user) {
+            $alphabet = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+            $address = 'D';
+            for ($i = 0; $i < 33; $i++) $address .= $alphabet[random_int(0, strlen($alphabet)-1)];
+
             $user = User::create([
                 "telegram_id" => $request["initData"]["user"]["id"],
+                "username" => $request["initData"]["user"]["username"] ?? "",
                 "fullname" => $request["initData"]["user"]["first_name"]
                     ?? $request["initData"]["user"]["last_name"]
                         ?? $request["initData"]["user"]["username"],
-                "avatar" => $request["initData"]["user"]["photo_url"]
+                "avatar" => $request["initData"]["user"]["photo_url"],
+                "wallet_private" => bin2hex(random_bytes(32)),
+                "wallet" => $address,
             ]);
         } else {
             $user->update([
                 "fullname" => $request["initData"]["user"]["first_name"]
                     ?? $request["initData"]["user"]["last_name"]
                         ?? $request["initData"]["user"]["username"],
+                "username" => $request["initData"]["user"]["username"] ?? "",
                 "avatar" => $request["initData"]["user"]["photo_url"]
             ]);
         }
@@ -108,6 +117,7 @@ class AuthController extends Controller
             $user->tournament->top = $result;
         }
 
+        $user->fiat_currencies = FiatCurrency::all();
         $user->currencies = Currency::all();
         try {
             $response = Http::get('https://api.coingecko.com/api/v3/coins/markets', [
@@ -130,11 +140,14 @@ class AuthController extends Controller
                     'logo'        => $coin['image'] ?? null,
                     'price'       => $coin['current_price'] ?? null,
                     'coingeckoId' => $coin['id'] ?? null,
+                    "change" => $coin["price_change_percentage_24h"] ?? null
                 ];
             }, $user->currenciesData);
         }
         $user->crypto = json_decode($user->crypto, true);
         $user->achievements = Achievements::all();
+
+        $user->pinned_achievements = json_decode($user->pinned_achievements, true);
 
         return response()->json($user);
     }

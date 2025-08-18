@@ -1,5 +1,6 @@
 <script>
 import config from "@/config.json"
+import {removeLoading} from "@/assets/admin.js";
 export default {
     data() {
         return {
@@ -9,6 +10,7 @@ export default {
         }
     },
     async mounted() {
+        removeLoading();
         // document.body.style.backgroundColor = "#14141e"
         // document.querySelectorAll(".adminnav_main_nav_main>div>p").forEach((el)=>{
         //     el.addEventListener("mouseenter", (ev) => ev.stopPropagation());
@@ -157,6 +159,21 @@ export default {
                     <div v-if="$route.path === '/admin/achievements'" class="adminnav_main_nav_main_el_point">&middot;</div>
                     <i class="fa-solid fa-cart-shopping"></i>
                     <p>Достижения</p>
+                </div>
+                <div @click="$router.push('/admin/fiats')">
+                    <div v-if="$route.path === '/admin/fiats'" class="adminnav_main_nav_main_el_point">&middot;</div>
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <p>Валюта</p>
+                </div>
+                <div @click="$router.push('/admin/orders')">
+                    <div v-if="$route.path === '/admin/orders'" class="adminnav_main_nav_main_el_point">&middot;</div>
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <p>P2P Ордеры</p>
+                </div>
+                <div @click="$router.push('/admin/support')">
+                    <div v-if="$route.path === '/admin/support'" class="adminnav_main_nav_main_el_point">&middot;</div>
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <p>Поддержка</p>
                 </div>
             </div>
         </nav>

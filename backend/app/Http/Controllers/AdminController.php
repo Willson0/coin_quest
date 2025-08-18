@@ -5,14 +5,17 @@ namespace App\Http\Controllers;
 use App\Http\Requests\AdminCreateAchievementRequest;
 use App\Http\Requests\AdminCreateCourseRequest;
 use App\Http\Requests\AdminCreateCurrencyRequest;
+use App\Http\Requests\AdminCreateFiatRequest;
 use App\Http\Requests\AdminCreateLessonRequest;
 use App\Http\Requests\AdminCreateNewsRequest;
 use App\Http\Requests\AdminCreateTournamentRequest;
 use App\Http\Requests\AdminUpdateAchievementRequest;
 use App\Http\Requests\AdminUpdateCourseRequest;
 use App\Http\Requests\AdminUpdateCurrencyRequest;
+use App\Http\Requests\AdminUpdateFiatRequest;
 use App\Http\Requests\adminUpdateNewsCategoryRequest;
 use App\Http\Requests\AdminUpdateNewsRequest;
+use App\Http\Requests\AdminUpdateOrderRequest;
 use App\Http\Requests\AdminUpdateTournamentRequest;
 use App\Http\utils;
 use App\Models\Achievements;
@@ -20,10 +23,13 @@ use App\Models\Admin;
 use App\Models\AdminCookie;
 use App\Models\Course;
 use App\Models\Currency;
+use App\Models\FiatCurrency;
 use App\Models\Lesson;
 use App\Models\News;
 use App\Models\NewsCategory;
+use App\Models\Order;
 use App\Models\Picture;
+use App\Models\Support;
 use App\Models\Tournament;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
@@ -358,5 +364,142 @@ class AdminController extends Controller
 
         Achievements::create($validate);
         return $this->achievements();
+    }
+
+    public function fiats () {
+        return FiatCurrency::all();
+    }
+
+    public function updateFiat (FiatCurrency $fiat, AdminUpdateFiatRequest $request) {
+        $validate = $request->validated();
+        if ($request->has("image")) {
+            Storage::disk("public")->delete($fiat->image);
+
+            $picture = $request->file("image");
+            $time = time();
+            $url = "fiats/image_$time" . "." . $picture->extension();
+            Storage::disk("public")->putFileAs("fiats", $picture, "image_$time" . "." . $picture->extension());
+            $validate["image"] = $url;
+        }
+        $fiat->update($validate);
+        return $this->fiats();
+    }
+
+    public function deleteFiat (FiatCurrency $fiat, Request $request) {
+        Order::where("fiat_currency_id", $fiat->id)->delete();
+
+        Storage::disk("public")->delete($fiat->image);
+        $fiat->delete();
+        return $this->fiats();
+    }
+
+    public function createFiat (AdminCreateFiatRequest $request) {
+        $validate = $request->validated();
+
+        $picture = $request->file("image");
+        $time = time();
+        $url = "fiats/image_$time" . "." . $picture->extension();
+        Storage::disk("public")->putFileAs("fiats", $picture, "image_$time" . "." . $picture->extension());
+        $validate["image"] = $url;
+
+        FiatCurrency::create($validate);
+        return $this->fiats();
+    }
+
+    public function supports () {
+        $supports = Support::all();
+        foreach ($supports as &$support) $support->dialog = json_decode($support->dialog, true);
+        return $supports;
+    }
+
+    public function supportClose (Support $support) {
+        $support->is_closed = true;
+        $support->save();
+        return $this->supports();
+    }
+
+    public function supportSend (Support $support, Request $request) {
+        $text = $request->message;
+        $images = $request->file("images");
+
+        if (!$text AND !$images) abort(400, "Не указано сообщение");
+        if ($support->is_closed) abort (409, "Саппорт уже закрыт");
+
+        $support->dialog = json_decode($support->dialog, true);
+
+        $message = [
+            "from" => "admin",
+            "text" => $text,
+        ];
+
+        if ($request->has("images")) {
+            $message["images"] = [];
+
+            $index = 0;
+            foreach ($images as $image) {
+                $time = time();
+                $url = "support/image_$time" . "_" . $index . "." . $image->extension();
+                Storage::disk("public")->putFileAs("support", $image, "image_$time" . "_" . $index . "." . $image->extension());
+
+                $message["images"][] = $url;
+                $index++;
+            }
+        }
+
+        $dialog = $support->dialog;
+        $dialog[] = $message;
+        $support->dialog = $dialog;
+
+        $support->save();
+
+        return $this->supports();
+    }
+
+    public function orders () {
+        return Order::all();
+    }
+
+    public function deleteOrder (Order $order) {
+        $order->delete();
+        return $this->orders();
+    }
+
+    public function updateOrder (Order $order, AdminUpdateOrderRequest $request) {
+        $validate = $request->validated();
+        if (isset($validate["min_limit"]) && isset($validate["max_limit"]))
+            if ($validate["min_limit"] > $validate["max_limit"]) {
+                unset($validate["min_limit"]);
+                unset($validate["max_limit"]);
+            }
+        if ($request->has("user_avatar")) {
+            Storage::disk("public")->delete($order->user_avatar);
+
+            $picture = $request->file("user_avatar");
+            $time = time();
+            $url = "orders/image_$time" . "." . $picture->extension();
+            Storage::disk("public")->putFileAs("orders", $picture, "image_$time" . "." . $picture->extension());
+            $validate["user_avatar"] = $url;
+        }
+        $order->update($validate);
+        return $this->orders();
+    }
+
+    public function createOrder (AdminUpdateOrderRequest $request) {
+        $validate = $request->validated();
+
+        if (isset($validate["min_limit"]) && isset($validate["max_limit"]))
+            if ($validate["min_limit"] > $validate["max_limit"]) {
+                unset($validate["min_limit"]);
+                unset($validate["max_limit"]);
+            }
+
+        $picture = $request->file("user_avatar");
+        $time = time();
+        $url = "orders/image_$time" . "." . $picture->extension();
+        Storage::disk("public")->putFileAs("orders", $picture, "image_$time" . "." . $picture->extension());
+        $validate["user_avatar"] = $url;
+
+        Order::create($validate);
+        return $this->orders();
     }
 }

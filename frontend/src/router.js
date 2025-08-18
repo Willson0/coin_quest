@@ -9,6 +9,9 @@ import adminPostsView from "@/views/admin/adminPostsView.vue";
 import adminTournamentsView from "@/views/admin/AdminTournamentsView.vue";
 import adminCurrenciesView from "@/views/admin/adminCurrenciesView.vue";
 import adminAchievementsView from "@/views/admin/adminAchievementsView.vue";
+import adminFiatCurrenciesView from "@/views/admin/adminFiatCurrenciesView.vue";
+import adminOrdersView from "@/views/admin/adminOrdersView.vue";
+import adminSupportView from "@/views/admin/adminSupportView.vue";
 
 
 const routes = [
@@ -69,6 +72,24 @@ const routes = [
         component: adminAchievementsView,
         meta: { title: 'CryptoCourses | Achievements', h: 'Достижения' },
         name: 'achievements'
+    },
+    {
+        path: "/admin/fiats",
+        component: adminFiatCurrenciesView,
+        meta: { title: 'CryptoCourses | Fiat', h: 'Реальная валюта' },
+        name: 'fiat'
+    },
+    {
+        path: "/admin/orders",
+        component: adminOrdersView,
+        meta: { title: 'CryptoCourses | Orders', h: 'Ордеры' },
+        name: 'orders'
+    },
+    {
+        path: "/admin/support",
+        component: adminSupportView,
+        meta: { title: 'CryptoCourses | Support', h: 'Поддержка' },
+        name: 'support'
     },
 ]
 

@@ -1,8 +1,10 @@
 <script>
 import {toLink} from "@/utils.js";
 import config from "@/config.json";
+import LessonComponent from "@/components/LessonComponent.vue";
 
 export default {
+    components: {LessonComponent},
     data () {
         return {
             config: config,
@@ -21,8 +23,49 @@ export default {
         user () {
             return this.$store.state.user;
         },
+        balance () {
+            if (!this.user.id) return;
+            let summ = 0;
+
+            for (let crypt in this.user.crypto) {
+                summ += this.user.crypto[crypt] * this.user.currenciesData?.find(a => a.coingeckoId === crypt)?.price;
+            }
+            return summ;
+        },
         percentCourse () {
-            return this.user.courses?.reduce((sum, course) => sum + course.progress, 0) / this.user.courses?.length;
+            if (!this.user.id) return 0;
+
+            const totalLessons = this.user.courses.reduce((sum, course) => sum + course.lessons.length, 0);
+            return this.countLesson / totalLessons * 100;
+        },
+        closestLesson () {
+            if (this.user.courses) {
+                for (let course of this.user.courses) {
+                    let ended = course.lessons.filter(a => a.user_points != null);
+                    if (ended.length === 0) {
+                        if (course.lessons.length > 0) {
+                            return course.lessons[0];
+                        }
+                    }
+
+                    let last = ended.sort((a, b) => b.user_points - a.user_points)[0];
+                    console.log(last);
+                    let next = course.lessons.filter(a => a.number > last.number);
+                    if (next) {
+                        return next.sort((a, b) => a.number - b.number)[0];
+                    }
+                }
+            }
+        },
+        countLesson () {
+            let counter = 0;
+            for (let course of this.user.courses) {
+                for (let lesson of course.lessons) {
+                    if (lesson.count_tries > 0 && lesson.user_points >= 50) counter++;
+                    else if (lesson.count_tries === 0 && lesson.user_points != null) counter++;
+                }
+            }
+            return counter;
         }
     },
     methods: {
@@ -35,16 +78,24 @@ export default {
             if (!el) return;
 
             let fullWidth = el.offsetWidth;
-            if (fullWidth * (progress / 100) < 16) return 20 + "px";
-            else if (fullWidth * (progress / 100) > fullWidth - 16) return "calc(100% - 20px)";
-            return progress + "%";
+            let fullPercent = this.user.courses.reduce((sum, course) => sum + course.lessons.length, 0);
+            console.log(progress, fullPercent)
+
+            if (fullWidth * (progress / fullPercent) < 32) return 40 + "px";
+            // else if (fullWidth * (progress / fullPercent) > fullWidth - 32) return "calc(100% - 36px)";
+            return (progress / fullPercent) * 100 + "%";
         },
         initLefts () {
             if (!this.user.id) return;
             this.user.achievements.forEach((ach) => {
                 ach.left = this.getLeftAchievement(ach.progress);
             });
-        }
+        },
+        formatPrice(number, decimals = 0) {
+            let parts = number.toFixed(decimals).split('.');
+            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+            return decimals > 0 ? parts.join('.') : parts[0];
+        },
     },
     watch: {
         user () {
@@ -67,10 +118,10 @@ export default {
             <div class="profile_info_wallet">
                 <div class="profile_info_wallet_text">Баланс кошелька</div>
                 <div class="profile_info_wallet_balance">
-                    ₽{{formNum(user.balance)}}
-                    <svg xmlns="http://www.w3.org/2000/svg" width="8" height="15" viewBox="0 0 8 15" fill="none">
-                        <path d="M1 1.5L6.29289 6.79289C6.68342 7.18342 6.68342 7.81658 6.29289 8.20711L1 13.5" stroke="#1E1E22" stroke-width="2" stroke-linecap="round"/>
-                    </svg>
+                    ${{balance?.toFixed(2)}}
+<!--                    <svg xmlns="http://www.w3.org/2000/svg" width="8" height="15" viewBox="0 0 8 15" fill="none">-->
+<!--                        <path d="M1 1.5L6.29289 6.79289C6.68342 7.18342 6.68342 7.81658 6.29289 8.20711L1 13.5" stroke="#1E1E22" stroke-width="2" stroke-linecap="round"/>-->
+<!--                    </svg>-->
                 </div>
                 <div class="profile_info_wallet_buttons">
                     <div @click="toLink('send')">
@@ -101,26 +152,44 @@ export default {
                 </div>
             </div>
         </div>
+        <div class="profile_crypto">
+            <div>
+                <div v-for="(count, crypt) in user.crypto" v-show="count > 0">
+                    <div class="profile_crypto_header">
+                        <img :src="user.currenciesData.find(a => a.coingeckoId === crypt)?.logo" alt="">
+                        <div>
+                            <div class="profile_crypto_header_title">{{user.currenciesData.find(a => a.coingeckoId === crypt)?.symbol}}</div>
+                            <div class="profile_crypto_header_price">{{formatPrice(user.currenciesData.find(a => a.coingeckoId === crypt)?.price, 2)}} $<span :style="{'color': user.currenciesData.find(a => a.coingeckoId === crypt)?.change >= 0 ? '#5AD000' : '#AF0003'}"> {{user.currenciesData.find(a => a.coingeckoId === crypt)?.change.toFixed(2)}}%</span></div>
+                        </div>
+                    </div>
+                    <div class="profile_crypto_footer">
+                        <div class="profile_crypto_footer_count">{{count.toFixed(4)}} {{user.currenciesData.find(a => a.coingeckoId === crypt)?.symbol}}</div>
+                        <div class="profile_crypto_footer_count_price">${{formatPrice(user.currenciesData.find(a => a.coingeckoId === crypt)?.price * count, 2)}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="profile_achievements">
-            <div class="profile_achievements_title">
+            <div class="profile_achievements_title" @click="toLink('achievements')">
                 Витрина достижений
                 <svg xmlns="http://www.w3.org/2000/svg" width="8" height="15" viewBox="0 0 8 15" fill="none">
                     <path d="M1 1.5L6.29289 6.79289C6.68342 7.18342 6.68342 7.81658 6.29289 8.20711L1 13.5" stroke="#1E1E22" stroke-width="2" stroke-linecap="round"/>
                 </svg>
             </div>
             <div class="profile_achievements_main">
-                <div v-for="ach in user.achievements"><img v-if="percentCourse >= Number(ach.progress)" :src="config.storage + ach.image" alt=""></div>
+                <div v-for="ach in user.achievements" v-show="countLesson >= ach.progress && user.pinned_achievements?.includes(ach.id)"><img :src="config.storage + ach.image" alt=""></div>
+                <div v-for="el in (3 - (user.pinned_achievements?.length ?? 0))"></div>
             </div>
         </div>
         <div class="profile_progress">
             <div class="profile_progress_title">
                 <div>Прогресс курсов</div>
-                <div>{{ percentCourse }} / 100%</div>
+                <div>{{ percentCourse }} / 100</div>
             </div>
             <div class="profile_progress_bar">
-                <div class="profile_progress_bar_fill" :style="{'width': percentCourse + '%'}"></div>
+                <div class="profile_progress_bar_fill" :style="{'width': `calc(${percentCourse}%)`}"></div>
                 <div :style="{'left': ach.left}" class="profile_progress_bar_item" v-for="ach in user.achievements">
-                    <svg v-if="percentCourse >= Number(ach.progress)" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22" fill="none">
+                    <svg v-if="countLesson >= Number(ach.progress)" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22" fill="none">
                         <path d="M5.00002 4.14307H17C17.682 4.14307 18.3361 4.41398 18.8183 4.89622C19.3005 5.37846 19.5714 6.03251 19.5714 6.71449V9.14307C19.5714 9.69535 19.1237 10.1431 18.5714 10.1431H14C13.7633 10.1431 13.5714 9.95119 13.5714 9.7145C13.5714 9.4778 13.3796 9.28592 13.1429 9.28592H8.85716C8.62047 9.28592 8.42859 9.4778 8.42859 9.7145C8.42859 9.95119 8.23671 10.1431 8.00002 10.1431H3.42859C2.8763 10.1431 2.42859 9.69535 2.42859 9.14307V6.71449C2.42859 6.03251 2.69951 5.37846 3.18174 4.89622C3.66398 4.41398 4.31803 4.14307 5.00002 4.14307ZM10.1429 11.0002C10.1429 10.5268 10.5266 10.1431 11 10.1431C11.4734 10.1431 11.8572 10.5268 11.8572 11.0002C11.8572 11.4736 11.4734 11.8574 11 11.8574C10.5266 11.8574 10.1429 11.4736 10.1429 11.0002ZM2.42859 12.0002C2.42859 11.4479 2.8763 11.0002 3.42859 11.0002H7.8225C8.15723 11.0002 8.42859 11.2716 8.42859 11.6063C8.42859 11.767 8.49244 11.9212 8.60611 12.0349L9.84998 13.2787C10.0375 13.4663 10.2919 13.5716 10.5571 13.5716H11.4429C11.7082 13.5716 11.9625 13.4663 12.1501 13.2787L13.3939 12.0349C13.5076 11.9212 13.5714 11.767 13.5714 11.6063C13.5714 11.2716 13.8428 11.0002 14.1775 11.0002H18.5714C19.1237 11.0002 19.5714 11.4479 19.5714 12.0002V16.8574C19.5714 17.4096 19.1237 17.8574 18.5714 17.8574H3.42859C2.8763 17.8574 2.42859 17.4096 2.42859 16.8574V12.0002Z" fill="#FF7700"/>
                     </svg>
                     <svg v-else xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -129,6 +198,7 @@ export default {
                 </div>
             </div>
         </div>
+        <lesson-component style="margin: 11px; margin-top: 24px;" :is-closest="true" v-if="closestLesson" :lesson="closestLesson" />
     </div>
 </template>
 

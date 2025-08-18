@@ -255,3 +255,17 @@ export function closeOverlay(overlay, background = null) {
         if (background) document.querySelector('.' + background).style.display = "none";
     }, {once: true});
 }
+
+export function showSuccess () {
+    let elem = document.querySelector('.successComponent');
+    elem.style.display = "";
+    requestAnimationFrame(() => {
+        elem.style.opacity = "1";
+    });
+}
+
+export function formatPrice(number, decimals = 0) {
+    let parts = number.toFixed(decimals).split('.');
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    return decimals > 0 ? parts.join('.') : parts[0];
+}
