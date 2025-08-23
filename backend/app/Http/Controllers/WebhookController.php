@@ -21,8 +21,8 @@ class WebhookController extends Controller
             if (trim($text) === '/start') {
                 Telegram::sendPhoto([
                     'chat_id' => $chatId,
-                    'caption'    => 'Лучшие крипто курсы',
-//                    'parse_mode' => 'MarkdownV2',
+                    'caption'    => '*Добро пожаловать в наш бот! 👋* \nЗдесь вы сможете открыть демо-крипто-счёт, пройти интерактивные курсы и освоить основы работы с криптовалютой\n\n📚 Начните обучение прямо сейчас — первые шаги в мире крипты доступны каждому!',
+                    'parse_mode' => 'MarkdownV2',
                     "photo" => InputFile::create(Storage::disk("public")->path("message.jpg")),
                     "reply_markup" => json_encode([
                         "inline_keyboard" => [
