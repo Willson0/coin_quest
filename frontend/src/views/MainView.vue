@@ -133,17 +133,12 @@ export default {
             document.body.style.overflow = "";
         },
         '$route.query' (to, from) {
+
             window.Telegram.WebApp.setHeaderColor("secondary_bg_color");
             document.body.style.overflow = "";
 
-            const footer = document.querySelector('.footer');
+            const footer = document.querySelector('.nav');
             if (footer) footer.style.display = '';
-
-            const dialog = document.querySelector('.dialog');
-            if (dialog) dialog.style.height = '';
-
-            const nav = document.querySelector('.nav');
-            if (nav) nav.style.paddingBottom = '';
 
             this.$nextTick(() => this.hideFooter())
 
