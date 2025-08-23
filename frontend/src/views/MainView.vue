@@ -138,7 +138,10 @@ export default {
             document.body.style.overflow = "";
 
             const footer = document.querySelector('.nav');
-            if (footer) footer.style.display = '';
+            if (footer) {
+                footer.style.display = '';
+                footer.style.opacity = "1";
+            }
 
             this.$nextTick(() => this.hideFooter())
 
