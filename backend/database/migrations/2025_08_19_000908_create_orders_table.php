@@ -26,11 +26,11 @@ return new class extends Migration
 
             $table->unsignedBigInteger("currency_id");
             $table->index("currency_id");
-            $table->foreign("currency_id")->references("id")->on("currencies");
+            $table->foreign("currency_id")->references("id")->on("currencies")->onDelete("cascade");
 
             $table->unsignedBigInteger("fiat_currency_id");
             $table->index("fiat_currency_id");
-            $table->foreign("fiat_currency_id")->references("id")->on("fiat_currencies");
+            $table->foreign("fiat_currency_id")->references("id")->on("fiat_currencies")->onDelete("cascade");
 
             $table->timestamps();
         });

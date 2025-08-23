@@ -121,6 +121,7 @@ export default {
             <div @click="selectCategory(category.id)" :class="{'active': selectedCategory === category.id}"
                  v-for="category in user.news">{{ category.name }}</div>
         </div>
+        <div style="margin-left: 10px;" v-if="selectedCategory === -1 ? !user.allNews?.length : !user.news.find(item => item.id === selectedCategory).news?.length">Тут пока что ничего нет...</div>
         <div class="news_main">
             <div @click="post.link ? openLink(post.link) : ''" v-for="post in selectedCategory === -1 ? user.allNews : user.news.find(item => item.id === selectedCategory).news">
                 <div class="news_main_photo">

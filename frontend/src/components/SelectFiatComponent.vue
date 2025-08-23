@@ -25,6 +25,7 @@ export default {
             </svg>
             <input v-model="search" placeholder="Поиск валюты">
         </div>
+        <div v-if="!user.fiat_currencies?.length">Тут пока что ничего нет...</div>
         <div class="trade_overlay_main selectFiat_main">
             <div v-for="(crypt, key) in user.fiat_currencies?.filter(c => c.name.toLowerCase().trim().includes(search.toLowerCase().trim()))" @click="$emit('change', crypt.id)">
                 <img :src="config.storage + crypt.image" alt="">

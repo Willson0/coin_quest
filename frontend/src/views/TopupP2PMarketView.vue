@@ -155,6 +155,7 @@ export default {
 </script>
 
 <template>
+    <div v-if="!orders?.length" style="position:fixed; z-index:10000; top: 10px; left: 10px; font-size: 18px;">Тут пока что ничего нет...</div>
     <div class="loading p2pMarket_loading"></div>
     <select-currency-component @change="selectedCurrency = $event; changeCurrency = false;"
                                :crypts="selledCrypts" v-if="((!selectedCurrency) || changeCurrency) && !sharingId"/>
