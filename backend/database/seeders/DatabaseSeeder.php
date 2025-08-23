@@ -187,7 +187,7 @@ class DatabaseSeeder extends Seeder
                 '/000000',
                 SUBSTRING(link, LOCATE('?', link))
               )
-            WHERE link LIKE 'https://via.placeholder.com/640x480.png/%'
+            WHERE image LIKE 'https://via.placeholder.com/640x480.png/%'
         ");
 
         DB::update("
