@@ -1949,6 +1949,7 @@ input[type="number"] {
     display: flex;
     flex-direction: column;
     height: 100vh;
+    transition: 0.2s;
 }
 .support_header {
     padding: 19px 0;
@@ -1972,6 +1973,7 @@ input[type="number"] {
     display: flex;
     flex-direction: row;
     gap:12px;
+    transition: 0.2s;
 }
 .support_input>svg {
     width: 40px;
