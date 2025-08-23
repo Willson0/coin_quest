@@ -107,7 +107,10 @@
                             if (this.selectedLesson[key]) fd.append('count_tries', 2);
                             else fd.append('count_tries', 0);
                         }
-                        else if (JSON.stringify(this.selectedLesson[key]) !== JSON.stringify(oldLesson[key])) fd.append(key, this.selectedLesson[key]);
+                        else if (JSON.stringify(this.selectedLesson[key]) !== JSON.stringify(oldLesson[key])) {
+                            if (typeof this.selectedLesson[key] === 'string') fd.append(key, this.selectedLesson[key]);
+                            else fd.append(key, JSON.stringify(this.selectedLesson[key]));
+                        }
                     }
 
                     axios.post(config.backend + "admin/lessons/" + this.selectedLesson.id, fd, {
