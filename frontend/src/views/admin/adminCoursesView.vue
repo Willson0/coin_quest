@@ -112,9 +112,10 @@
                     }).then((response) => {
                         alert('Курс сохранен');
                         this.courses = response.data.courses;
-                        this.selectedLesson = {...this.courses.find(a => a.id === this.selectedCourse.id).lessons.find(a => a.id === this.selectedLesson.id)};
-                        this.selectedLesson.questions = JSON.parse(this.selectedLesson.questions);
-                        this.selectedLesson.isExam = this.selectedLesson.count_tries > 0;
+                        // this.selectedLesson = {...this.courses.find(a => a.id === this.selectedCourse.id).lessons.find(a => a.id === this.selectedLesson.id)};
+                        // this.selectedLesson.questions = JSON.parse(this.selectedLesson.questions);
+                        // this.selectedLesson.isExam = this.selectedLesson.count_tries > 0;
+                        this.selectedLesson = null;
                     });
                 } else {
                     axios.post(config.backend + "admin/lessons", this.selectedLesson, {

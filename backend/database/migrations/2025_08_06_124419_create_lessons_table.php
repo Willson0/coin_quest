@@ -21,7 +21,7 @@ return new class extends Migration
 
             $table->unsignedBigInteger("course_id");
             $table->index(["course_id"]);
-            $table->foreign("course_id")->references("id")->on("courses");
+            $table->foreign("course_id")->references("id")->on("courses")->onDelete('cascade');
 
             $table->boolean("is_exam")->default(false);
 
