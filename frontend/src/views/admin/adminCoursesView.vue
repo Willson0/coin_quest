@@ -115,6 +115,7 @@
                         // this.selectedLesson = {...this.courses.find(a => a.id === this.selectedCourse.id).lessons.find(a => a.id === this.selectedLesson.id)};
                         // this.selectedLesson.questions = JSON.parse(this.selectedLesson.questions);
                         // this.selectedLesson.isExam = this.selectedLesson.count_tries > 0;
+                        togglePopup('courses_overlay');
                         this.selectedLesson = null;
                     });
                 } else {
