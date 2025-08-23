@@ -67,7 +67,7 @@ export default {
             return close;
         },
         getTournamentDate () {
-            if (this.closestTournament.id === this.user.tournament.id && this.closestTournament.type !== 'lesson') {
+            if (this.closestTournament?.id === this.user.tournament?.id && this.closestTournament.type !== 'lesson') {
                 let ms = new Date(this.closestTournament.date_end.replace(' ', 'T') + '+03:00').getTime() - new Date(this.closestTournament.date_start.replace(' ', 'T') + '+03:00').getTime();
                 let hours = Math.floor(ms / (1000 * 60 * 60));
                 let minutes = Math.floor(ms / (1000 * 60)) % 60;
@@ -202,7 +202,7 @@ export default {
                     <div class="tournament_closest_time_title">{{ closestTournament.name }}</div>
                     <div class="tournament_closest_time_date" v-html="getTournamentDate"></div>
                 </div>
-                <div class="tournament_closest_time_go" v-if="closestTournament?.id === this.user.tournament.id">
+                <div class="tournament_closest_time_go" v-if="closestTournament?.id === this.user.tournament?.id">
                     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
                         <circle cx="16" cy="16" r="16" fill="#B963FF"/>
                         <path d="M14 10L19.2929 15.2929C19.6834 15.6834 19.6834 16.3166 19.2929 16.7071L14 22" stroke="white" stroke-width="2" stroke-linecap="round"/>
