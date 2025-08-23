@@ -107,7 +107,7 @@
                             if (this.selectedLesson[key]) fd.append('count_tries', 2);
                             else fd.append('count_tries', 0);
                         }
-                        if (key === "count_tries") {
+                        else if (key === "count_tries") {
                             if (this.selectedLesson[key] > 0) {
                                 fd.append('count_tries', 2);
                             } else {

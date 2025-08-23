@@ -23,14 +23,14 @@ export default {
 
 <template>
     <div class="lesson" @click="isLocked ? null : toLink('lesson', lesson.id)" :style="{'cursor': isLocked ? 'not-allowed' : 'pointer',
-        'background': lesson.user_points != null ? (lesson.user_points > 75 ? 'linear-gradient(90deg, #ffffff 0%, #d3ffbe 100%)' : lesson.user_point >= 50 ? 'linear-gradient(90deg, #ffffff 0%, #ffdd9f 100%)' : 'linear-gradient(90deg, #ffffff 0%, #ffaeae 100%)') : '',
+        'background': lesson.user_points != null ? (lesson.user_points > 75 ? 'linear-gradient(90deg, #ffffff 0%, #d3ffbe 100%)' : lesson.user_points >= 50 ? 'linear-gradient(90deg, #ffffff 0%, #ffdd9f 100%)' : 'linear-gradient(90deg, #ffffff 0%, #ffaeae 100%)') : '',
         'margin-top': lesson.count_tries ? '24px' : ''}" :class="{'locked': isLocked}">
         <div class="lesson_blocked" v-if="isLocked"></div>
         <div class="lessons_main_info">
             <div class="lessons_main_info_closest" v-if="isClosest">Ближайший урок</div>
             <div class="lessons_main_info_title">{{ lesson.title }}</div>
             <div class="lessons_main_info_count" :style="{
-                'color': lesson.user_points != null ? (lesson.user_points > 75 ? '#5ad000' : lesson.user_point >= 50 ? '#ff7700' : '#d01100') : ''
+                'color': lesson.user_points != null ? (lesson.user_points > 75 ? '#5ad000' : lesson.user_points >= 50 ? '#ff7700' : '#d01100') : ''
             }">{{ lesson.user_points ?? 0 }} / 100 баллы</div>
         </div>
         <div class="lessons_main_status">
@@ -42,7 +42,7 @@ export default {
             </svg>
             <svg v-else-if="lesson.user_points != null" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
                 <path d="M32 16C32 24.8366 24.8366 32 16 32C7.16344 32 0 24.8366 0 16C0 7.16344 7.16344 0 16 0C24.8366 0 32 7.16344 32 16ZM3.2 16C3.2 23.0692 8.93075 28.8 16 28.8C23.0692 28.8 28.8 23.0692 28.8 16C28.8 8.93075 23.0692 3.2 16 3.2C8.93075 3.2 3.2 8.93075 3.2 16Z" fill="#F5F5F5"/>
-                <path d="M16 0C24.8366 0 32 7.16344 32 16C32 24.8366 24.8366 32 16 32C7.16344 32 0 24.8366 0 16C0 7.16344 7.16344 0 16 0Z" :fill="lesson.user_points > 75 ? '#5ad000' : lesson.user_point >= 50 ? '#ff7700' : '#d01100'"/>
+                <path d="M16 0C24.8366 0 32 7.16344 32 16C32 24.8366 24.8366 32 16 32C7.16344 32 0 24.8366 0 16C0 7.16344 7.16344 0 16 0Z" :fill="lesson.user_points > 75 ? '#5ad000' : lesson.user_points >= 50 ? '#ff7700' : '#d01100'"/>
                 <path d="M11 16.5L14.1914 19.963C14.6584 20.4697 15.4859 20.3633 15.8096 19.755L21 10" stroke="white" stroke-width="2" stroke-linecap="round"/>
             </svg>
             <svg v-else xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
