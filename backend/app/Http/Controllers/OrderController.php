@@ -33,15 +33,19 @@ class OrderController extends Controller
         if (!isset($crypto[$currency->coingeckoId])) $crypto[$currency->coingeckoId] = 0;
         $crypto[$currency->coingeckoId] += $request->count;
 
-        $order->remain -= $request->count;
-        if ($order->remain == 0) $order->delete();
-
-        $order->count_deals += 1;
         $user->crypto = json_encode($crypto);
-
         $user->save();
-        $order->save();
 
-        return response()->json(["crypto" => json_decode($user->crypto, 1)]);
+        $order->remain = $order->remain - $request->count;
+        if ((float)$order->remain < 1e-15) $order->delete();
+        else {
+            $order->count_deals += 1;
+            $order->save();
+        }
+
+        return response()->json([
+            "crypto" => json_decode($user->crypto, 1),
+            "orders" => $this->index($request)->original
+        ]);
     }
 }

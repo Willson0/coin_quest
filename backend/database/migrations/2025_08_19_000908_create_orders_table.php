@@ -19,7 +19,7 @@ return new class extends Migration
             $table->boolean("is_safe")->default(false);
 
             $table->integer("count_deals")->default(0);
-            $table->integer("remain");
+            $table->decimal("remain", 30, 18);
             $table->string("payment_method")->default("sbp");
 
             $table->integer("price");

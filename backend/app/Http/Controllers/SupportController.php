@@ -23,6 +23,7 @@ class SupportController extends Controller
 
     public function send (SupportSendRequest $request) {
         $user = User::where("telegram_id", $request["initData"]["user"]["id"])->firstOrFail();
+        if (!$request->has("message") AND !$request->has("images")) abort(400);
 
         $support = Support::where("user_id", $user->id)->where("is_closed", 0)->first();
         if (!$support) {

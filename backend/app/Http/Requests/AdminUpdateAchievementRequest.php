@@ -24,6 +24,7 @@ class AdminUpdateAchievementRequest extends FormRequest
         return [
             "image" => "nullable|file|mimes:jpeg,png,jpg,gif,svg,webp",
             "progress" => "nullable|integer|min:0",
+            "title" => "nullable|string",
         ];
     }
 }

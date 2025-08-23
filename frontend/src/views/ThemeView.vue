@@ -77,6 +77,7 @@ export default {
         </div>
         <div class="theme_lessons">
             <div class="theme_lessons_title">Уроки</div>
+            <div v-if="course.lessons?.length === 0">Тут пока что ничего нет...</div>
             <div class="theme_lessons_main">
                 <lesson-component v-for="les in course.lessons" :lesson="les"
                       :is-locked="(les.number !== 1 && ((course.lessons?.find(lesson => lesson.number === les.number-1)?.user_points) == null))"/>

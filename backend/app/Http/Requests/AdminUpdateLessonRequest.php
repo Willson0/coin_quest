@@ -11,7 +11,7 @@ class AdminUpdateLessonRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,13 @@ class AdminUpdateLessonRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            "title" => "nullable|string|max:255",
+            "description" => "nullable|string",
+            "videos" => "nullable",
+            "questions" => "nullable",
+            "course_id" => "nullable|exists:courses,id",
+            "number" => "nullable|integer",
+            "count_tries" => "integer",
         ];
     }
 }

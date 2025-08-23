@@ -24,6 +24,7 @@ class AdminCreateAchievementRequest extends FormRequest
         return [
             "image" => "required|file|mimes:jpeg,png,jpg,gif,svg,webp",
             "progress" => "required|integer|min:0",
+            "title" => "required|string",
         ];
     }
 }

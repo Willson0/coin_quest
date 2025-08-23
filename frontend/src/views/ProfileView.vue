@@ -8,10 +8,21 @@ export default {
     data () {
         return {
             config: config,
+            mouseDown: false,
+            startX: 0,
+            scrollLeft: 0,
+            isDragging: false,
         }
     },
     mounted () {
         this.initLefts();
+
+        window.addEventListener('mouseup', this.mouseup);
+        window.addEventListener('mousemove', this.mousemove);
+    },
+    unmounted () {
+        window.removeEventListener('mouseup', this.mouseup);
+        window.removeEventListener('mousemove', this.mousemove);
     },
     computed: {
         avatar () {
@@ -36,6 +47,7 @@ export default {
             if (!this.user.id) return 0;
 
             const totalLessons = this.user.courses.reduce((sum, course) => sum + course.lessons.length, 0);
+            if (totalLessons === 0) return 100;
             return this.countLesson / totalLessons * 100;
         },
         closestLesson () {
@@ -81,6 +93,7 @@ export default {
             let fullPercent = this.user.courses.reduce((sum, course) => sum + course.lessons.length, 0);
             console.log(progress, fullPercent)
 
+            if (fullPercent === 0) return 100 + "%";
             if (fullWidth * (progress / fullPercent) < 32) return 40 + "px";
             // else if (fullWidth * (progress / fullPercent) > fullWidth - 32) return "calc(100% - 36px)";
             return (progress / fullPercent) * 100 + "%";
@@ -95,6 +108,31 @@ export default {
             let parts = number.toFixed(decimals).split('.');
             parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
             return decimals > 0 ? parts.join('.') : parts[0];
+        },
+        mousedown(ev) {
+            ev.preventDefault();
+            let el = this.$refs.newsNav;
+
+            document.body.classList.add("grabbing");
+
+            this.mouseDown = true;
+            this.startX = ev.pageX - el.offsetLeft;
+            this.scrollLeft = el.scrollLeft;
+        },
+        mousemove (ev) {
+            if (!this.mouseDown) return;
+
+            ev.preventDefault();
+            let slider = this.$refs.newsNav;
+
+            const x = ev.pageX - slider.offsetLeft;
+            const walk = (x - this.startX) * 1; // 1 = чувствительность
+            slider.scrollLeft = this.scrollLeft - walk;
+        },
+        mouseup (ev) {
+            this.mouseDown = false;
+
+            document.body.classList.remove("grabbing");
         },
     },
     watch: {
@@ -152,7 +190,7 @@ export default {
                 </div>
             </div>
         </div>
-        <div class="profile_crypto">
+        <div class="profile_crypto" ref="newsNav" @mousedown.stop="mousedown">
             <div>
                 <div v-for="(count, crypt) in user.crypto" v-show="count > 0">
                     <div class="profile_crypto_header">
@@ -163,7 +201,7 @@ export default {
                         </div>
                     </div>
                     <div class="profile_crypto_footer">
-                        <div class="profile_crypto_footer_count">{{count.toFixed(4)}} {{user.currenciesData.find(a => a.coingeckoId === crypt)?.symbol}}</div>
+                        <div class="profile_crypto_footer_count">{{Number(count).toFixed(4).replace(/\.?0+$/, "")}} {{user.currenciesData.find(a => a.coingeckoId === crypt)?.symbol}}</div>
                         <div class="profile_crypto_footer_count_price">${{formatPrice(user.currenciesData.find(a => a.coingeckoId === crypt)?.price * count, 2)}}</div>
                     </div>
                 </div>
@@ -178,7 +216,7 @@ export default {
             </div>
             <div class="profile_achievements_main">
                 <div v-for="ach in user.achievements" v-show="countLesson >= ach.progress && user.pinned_achievements?.includes(ach.id)"><img :src="config.storage + ach.image" alt=""></div>
-                <div v-for="el in (3 - (user.pinned_achievements?.length ?? 0))"></div>
+                <div v-for="el in (3 - (user.achievements?.filter(ach => countLesson >= ach.progress && user.pinned_achievements?.includes(ach.id)).length ?? 0))"></div>
             </div>
         </div>
         <div class="profile_progress">
@@ -187,7 +225,7 @@ export default {
                 <div>{{ percentCourse }} / 100</div>
             </div>
             <div class="profile_progress_bar">
-                <div class="profile_progress_bar_fill" :style="{'width': `calc(${percentCourse}%)`}"></div>
+                <div class="profile_progress_bar_fill" :style="{'width': `${ percentCourse }%`}"></div>
                 <div :style="{'left': ach.left}" class="profile_progress_bar_item" v-for="ach in user.achievements">
                     <svg v-if="countLesson >= Number(ach.progress)" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22" fill="none">
                         <path d="M5.00002 4.14307H17C17.682 4.14307 18.3361 4.41398 18.8183 4.89622C19.3005 5.37846 19.5714 6.03251 19.5714 6.71449V9.14307C19.5714 9.69535 19.1237 10.1431 18.5714 10.1431H14C13.7633 10.1431 13.5714 9.95119 13.5714 9.7145C13.5714 9.4778 13.3796 9.28592 13.1429 9.28592H8.85716C8.62047 9.28592 8.42859 9.4778 8.42859 9.7145C8.42859 9.95119 8.23671 10.1431 8.00002 10.1431H3.42859C2.8763 10.1431 2.42859 9.69535 2.42859 9.14307V6.71449C2.42859 6.03251 2.69951 5.37846 3.18174 4.89622C3.66398 4.41398 4.31803 4.14307 5.00002 4.14307ZM10.1429 11.0002C10.1429 10.5268 10.5266 10.1431 11 10.1431C11.4734 10.1431 11.8572 10.5268 11.8572 11.0002C11.8572 11.4736 11.4734 11.8574 11 11.8574C10.5266 11.8574 10.1429 11.4736 10.1429 11.0002ZM2.42859 12.0002C2.42859 11.4479 2.8763 11.0002 3.42859 11.0002H7.8225C8.15723 11.0002 8.42859 11.2716 8.42859 11.6063C8.42859 11.767 8.49244 11.9212 8.60611 12.0349L9.84998 13.2787C10.0375 13.4663 10.2919 13.5716 10.5571 13.5716H11.4429C11.7082 13.5716 11.9625 13.4663 12.1501 13.2787L13.3939 12.0349C13.5076 11.9212 13.5714 11.767 13.5714 11.6063C13.5714 11.2716 13.8428 11.0002 14.1775 11.0002H18.5714C19.1237 11.0002 19.5714 11.4479 19.5714 12.0002V16.8574C19.5714 17.4096 19.1237 17.8574 18.5714 17.8574H3.42859C2.8763 17.8574 2.42859 17.4096 2.42859 16.8574V12.0002Z" fill="#FF7700"/>

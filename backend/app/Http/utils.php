@@ -344,7 +344,7 @@ class utils
         if ($lesson->number === 1) {
             $required_course = Course::where("id", $course->required_course)->first();
             if ($required_course) {
-                $hasNotPassed = Lesson::where('course_id', $course->id)
+                $hasNotPassed = Lesson::where('course_id', $required_course->id)
                     ->whereDoesntHave('userLessons', function($q) use ($user) {
                         $q->where('user_id', $user->id)
                             ->where(function($query) {

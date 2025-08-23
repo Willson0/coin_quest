@@ -210,15 +210,28 @@ export function startLoading (cl = "loading") {
 
 }
 
-export function copy (type, id) {
-    let text = 'https://t.me/' + config.bot + '?startapp=' + type + '_' + id;
-    navigator.clipboard.writeText(text)
-        .then(() => {
-            notify("Успешно скопировано!", 0);
-        })
-        .catch(err => {
-            notify("Устройство не позволяет скопирвать ссылку", 1);
-        });
+export function copy(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+        return navigator.clipboard.writeText(text)
+            .then(() => notify("Успешно скопировано!"))
+            .catch(() => notify("Устройство не поддерживает копирование!", 1));
+    } else {
+        let textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        try {
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            return notify("Успешно скопировано!");
+        } catch (err) {
+            document.body.removeChild(textarea);
+            return notify("Устройство не поддерживает копирование!", 1);
+        }
+    }
 }
 
 export function timestampToDate(timestamp) {

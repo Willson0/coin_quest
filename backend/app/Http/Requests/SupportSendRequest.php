@@ -22,7 +22,7 @@ class SupportSendRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "message" => "required|string",
+            "message" => "nullable|string",
             "images" => "nullable|array",
             "images.*" => "nullable|file|mimes:jpeg,png,jpg,gif,svg,webp",
         ];

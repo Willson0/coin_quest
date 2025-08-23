@@ -38,7 +38,7 @@ export default {
     <div class="adminLogin">
         <div class="adminLogin_main">
             <div class="adminLogin_main_site">
-                <h2>Верное чутьё</h2>
+                <h2>CoinQuest</h2>
             </div>
             <div class="adminLogin_main_title">
                 <h1>Welcome back!</h1>

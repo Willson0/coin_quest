@@ -22,6 +22,7 @@ import AchievementsView from "@/views/AchievementsView.vue";
 import SupportView from "@/views/SupportView.vue";
 import TopupWalletView from "@/views/TopupWalletView.vue";
 import TopupP2PMarket from "@/views/TopupP2PMarketView.vue";
+import router from "@/router.js";
 
 export default {
     name: "MainView",
@@ -90,14 +91,18 @@ export default {
 
         window.Telegram.WebApp.expand();
         window.Telegram.WebApp.disableVerticalSwipes();
-        if (window.Telegram.WebApp.initDataUnsafe.start_param) {
+        if (window.Telegram.WebApp.initDataUnsafe.start_param ) {
             const params = window.Telegram.WebApp.initDataUnsafe.start_param.split("_");
-            window.Telegram.WebApp.initDataUnsafe.start_param = undefined;
 
-            if (/^[0-9]+$/.test(params[1]) && Number(params[1]) >= 0)  {
-                if (params[0] === "user") toLink("user", params[1])
-                else if (["post", "event", "service"].includes(params[0])) toLink("share", params[1], params[0])
-            } else this.$router.push({ query: { s: 'profile' }});
+            const sessionKey = 'tg_start_param';
+            if (!sessionStorage.getItem(sessionKey)) {
+                if (/^[0-9]+$/.test(params[1]) && Number(params[1]) >= 0)  {
+                    if (params[0] === "achievement") toLink("achievements", params[1])
+                    else if (params[0] === "order") toLink("topup_p2p_market", params[1])
+                } else this.$router.push({ query: { s: 'profile' }});
+
+                sessionStorage.setItem(sessionKey, "1")
+            }
         }
         else if (!this.$route.query.s) this.$router.push({ query: { s: 'profile' }});
 

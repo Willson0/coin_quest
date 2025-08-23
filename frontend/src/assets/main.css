@@ -35,6 +35,10 @@
     --unselected: #D01100;
 }
 
+.grabbing * {
+    cursor: grabbing !important;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -292,6 +296,8 @@ input[type="number"] {
 .profile_crypto {
     margin-top: 24px;
     overflow-x:auto;
+    user-select: none;
+    cursor: grab;
 }
 .profile_crypto>div {
     display: flex;
@@ -299,6 +305,7 @@ input[type="number"] {
     padding: 0 11px;
     gap: 8px;
     width: max-content;
+    user-select: none;
 }
 .profile_crypto>div>div {
     background-color: var(--die);
@@ -311,6 +318,7 @@ input[type="number"] {
     flex-direction: column;
     gap: 12px;
     width: max-content;
+    user-select: none;
 }
 .profile_crypto_header {
     display: flex;
@@ -437,7 +445,6 @@ input[type="number"] {
     height: 100%;
     width: 70%;
     background: linear-gradient(90deg, #A2AEFF 0%, #BA60FF 100%);
-    z-index: -1;
     top:0;
     left:0;
     border-radius: 30px;
@@ -939,6 +946,7 @@ input[type="number"] {
     gap:12px;
     max-width: 100%;
     overflow: auto;
+    cursor: grab;
 }
 .news_nav>div {
     border-radius: 18px;
@@ -1417,6 +1425,7 @@ input[type="number"] {
     line-height: 16px;
     margin: auto 0;
     margin-right: 14px;
+    white-space: nowrap;
 }
 .lessons_main_status>svg {
     margin: auto 0;
@@ -1999,6 +2008,9 @@ input[type="number"] {
     padding: 8px;
     width: fit-content;
     max-width: 60%;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 .dialog_main_text {
     font-size: 14px;
@@ -2030,6 +2042,7 @@ input[type="number"] {
     column-gap: 6px;
     overflow: auto;
     padding: 0 16px;
+    cursor: grab;
 }
 .dialog_attachment>div>div {
     position: relative;
@@ -2065,7 +2078,6 @@ input[type="number"] {
     grid-template-columns: repeat(3, 1fr);
     gap: 6px;
     overflow:hidden;
-    margin-bottom: 6px;
 }
 .dialog_main_photos>img {
     height: 100px;
@@ -2074,6 +2086,7 @@ input[type="number"] {
     object-fit: cover;
     width: 100%;
     min-width: 100px;
+    border-radius: 16px;
 }
 
 

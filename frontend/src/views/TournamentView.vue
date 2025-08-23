@@ -34,7 +34,7 @@ export default {
         toEndDate () {
             if (!this.user.tournament) return;
 
-            let dateEnd = new Date(this.user.tournament.date_end);
+            let dateEnd = new Date(this.closestTournament.date_end.replace(' ', 'T') + '+03:00');
             let now = new Date();
             let diff = dateEnd.getTime() - now.getTime();
 
@@ -61,19 +61,22 @@ export default {
             if (this.user.closest_tournament?.id) close = this.user.closest_tournament;
             else close = this.user.tournament;
 
+            if (!close) return;
+
             if (close.object_id !== 0) close.object = this.user.courses.find((item) => item.id === close.object_id);
             return close;
         },
         getTournamentDate () {
             if (this.closestTournament.id === this.user.tournament.id && this.closestTournament.type !== 'lesson') {
-                let ms = new Date(this.closestTournament.date_end).getTime() - new Date(this.closestTournament.date_start).getTime();
+                let ms = new Date(this.closestTournament.date_end.replace(' ', 'T') + '+03:00').getTime() - new Date(this.closestTournament.date_start.replace(' ', 'T') + '+03:00').getTime();
                 let hours = Math.floor(ms / (1000 * 60 * 60));
                 let minutes = Math.floor(ms / (1000 * 60)) % 60;
 
                 return `${hours.toString().padStart(2, "0")}ч ${minutes.toString().padStart(2, "0")}м`
             }
-            let startDate = new Date(this.closestTournament.date_start);
-            let endDate = new Date(this.closestTournament.date_end);
+            let startDate = new Date(this.closestTournament.date_start.replace(' ', 'T') + '+03:00');
+            console.log(this.closestTournament.date_start);
+            let endDate = new Date(this.closestTournament.date_end.replace(' ', 'T') + '+03:00');
 
             return `${startDate.getDate().toString().padStart(2, "0")}.${(startDate.getMonth() + 1).toString().padStart(2, "0")}ㅤ${startDate.getHours().toString().padStart(2, "0")}:${startDate.getMinutes().toString().padStart(2, "0")} ` +
                 '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="2" viewBox="0 0 28 2" fill="none">' +
@@ -132,13 +135,14 @@ export default {
             <div class="tournament_poster_img">
                 <div class="tournament_poster_img_blur_left"></div>
                 <div class="tournament_poster_img_blur_right"></div>
-                <img src="/tournament_background.png" alt="">
+                <img src="/tournament_background.webp" alt="">
             </div>
             <div class="tournament_poster_title">Турниры</div>
             <div class="tournament_poster_description">Участвуйте в турнирах, проходите тесты и темы
                 на время. Зарабатывайте баллы и занимайте лидирующие позиции и получайте бонусы!</div>
         </div>
-        <div class="tournament_leaders">
+        <div class="tournament_leaders_title" style="margin-left: 20px;" v-if="!user.tournament">Тут пока что ничего нет...</div>
+        <div class="tournament_leaders" v-if="user.tournament">
             <div class="tournament_leaders_title">
                 <div>Лидеры</div>
                 <div>{{toEndDate}}</div>
@@ -165,7 +169,7 @@ export default {
                 <tournament-s-v-g />
             </div>
         </div>
-        <div class="tournament_you">
+        <div class="tournament_you" v-if="user.tournament">
             <div>
                 <div class="tournament_you_avatar">
                     <img :src="avatar" alt="">
@@ -189,7 +193,7 @@ export default {
             </div>
             <button ref="button" @click="isFullMode = true" v-if="user.tournament?.top.length > 7">Смотреть всех</button>
         </div>
-        <div class="tournament_closest" ref="closestTournament">
+        <div class="tournament_closest" ref="closestTournament" v-if="closestTournament">
             <div class="tournament_closest_title">Ближайший турнир</div>
             <div v-if="closestTournament?.type === 'time'" class="tournament_closest_time"
                  :style="{'cursor': closestTournament.id === this.user.tournament.id ? 'pointer' : 'auto'}"

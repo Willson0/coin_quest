@@ -1,7 +1,7 @@
 <script>
 import config from "@/config.json";
 import axios from "axios";
-import {endLoading, formatPrice, notify, showSuccess} from "@/utils.js";
+import {copy, endLoading, formatPrice, notify, showSuccess} from "@/utils.js";
 import SelectCurrencyComponent from "@/components/SelectCurrencyComponent.vue";
 import SelectFiatComponent from "@/components/SelectFiatComponent.vue";
 import SuccessComponent from "@/components/SuccessComponent.vue";
@@ -28,9 +28,13 @@ export default {
             changeSafe: false,
             selectedOrder: null,
             inFiat: true,
+            sharingId: null,
         }
     },
     async mounted () {
+        if (this.$route.query.id)
+            this.sharingId = Number(this.$route.query.id)
+
         window.Telegram.WebApp.BackButton.offClick(window.backByQueryFunction);
         window.Telegram.WebApp.BackButton.onClick(this.backFunction);
         window.Telegram.WebApp.BackButton.show();
@@ -54,7 +58,11 @@ export default {
             });
         },
         backFunction () {
-            if (!this.selectedCurrency) window.backByQueryFunction();
+            if (this.sharingId) {
+                if (this.selectedOrder) this.selectedOrder = null;
+                else this.sharingId = null;
+            }
+            else if (!this.selectedCurrency) window.backByQueryFunction();
             else if (this.changeCurrency || this.changeFiat || this.changePayment
                 || this.changeSafe || this.selectedOrder) {
                 this.changeCurrency = false;
@@ -76,7 +84,7 @@ export default {
             if (this.selectedOrder.min_limit && price < this.selectedOrder.min_limit) return notify("Минимальный лимит: " + formatPrice(this.selectedOrder.min_limit), 1);
             if (this.selectedOrder.max_limit && price > this.selectedOrder.max_limit) return notify("Максимальный лимит: " + formatPrice(this.selectedOrder.max_limit), 1);
 
-            await axios.post(config.backend + "order/" + this.selectedOrder, {
+            await axios.post(config.backend + "order/" + this.selectedOrder.id, {
                 initData: window.Telegram.WebApp.initData,
                 count: count,
             }).then((response) => {
@@ -84,11 +92,12 @@ export default {
                 newUser.crypto = response.data.crypto;
                 this.$store.dispatch("updateUser", newUser);
 
+                this.orders = response.data.orders;
                 showSuccess();
             }).catch((error) => {
                 notify(error.response.data.message ?? error.response.data, 1);
                 if (error.response.status === 404) {
-                    this.clickBack();
+                    this.selectedPayment = null;
                     this.fetchData();
                 }
             });
@@ -106,11 +115,15 @@ export default {
 
             this.count = 1;
 
+            console.log("Hide success")
             let elem = document.querySelector('.successComponent');
             elem.style.opacity = "0";
             elem.addEventListener('transitionend', () => {
                 elem.style.display = "none";
-            });
+            }, {once: true});
+        },
+        share (id) {
+            return copy(`https://t.me/${config.bot}?startapp=order_${id}`);
         }
     },
     computed: {
@@ -127,10 +140,13 @@ export default {
         },
         filteredOrders () {
             let orders = [...this.orders];
+
+            if (this.sharingId) return orders.filter(ord => ord.id === this.sharingId);
+
             if (this.selectedCurrency) orders = orders.filter(ord => ord.currency_id === this.user.currencies?.find(a => a.coingeckoId === this.selectedCurrency).id)
             if (this.selectedFiat) orders = orders.filter(ord => ord.fiat_currency_id === this.selectedFiat);
             if (this.selectedPayment) orders = orders.filter(ord => ord.payment_method === this.selectedPayment);
-            if (this.isSafe) orders = orders.filter(ord => ord.is_safe === true);
+            if (this.isSafe) orders = orders.filter(ord => ord.is_safe === 1);
 
             return orders.sort((a,b) => b.id - a.id);
         },
@@ -141,10 +157,10 @@ export default {
 <template>
     <div class="loading p2pMarket_loading"></div>
     <select-currency-component @change="selectedCurrency = $event; changeCurrency = false;"
-                               :crypts="selledCrypts" v-if="(!selectedCurrency) || changeCurrency"/>
+                               :crypts="selledCrypts" v-if="((!selectedCurrency) || changeCurrency) && !sharingId"/>
     <select-fiat-component v-if="changeFiat" @change="selectedFiat = $event; changeFiat = false"/>
     <div class="p2pMarket">
-        <div class="p2pMarket_filters">
+        <div class="p2pMarket_filters" v-if="!sharingId">
             <div @click="changePayment = true">
                 <div>
                     <div class="p2pMarket_filters_title">Оплата</div>
@@ -182,7 +198,7 @@ export default {
                 </svg>
             </div>
         </div>
-        <div class="p2pMarket_countInput">
+        <div v-if="!sharingId" class="p2pMarket_countInput">
             <div>Сумма</div>
             <input type="number" v-model="count">
         </div>
@@ -194,7 +210,7 @@ export default {
                         <div>Цена за {{count}} {{ user.currenciesData?.find(item => item.coingeckoId === this.user.currencies?.find(cur => cur.id === order.currency_id)?.coingeckoId).symbol }}</div>
                     </div>
                     <div class="p2pMarket_order_header_actions">
-                        <div>
+                        <div @click="share(order.id)">
                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M1.23077 14.1942C1.23077 14.5266 1.50629 14.7961 1.84615 14.7961H14.1538C14.4937 14.7961 14.7692 14.5266 14.7692 14.1942V9.39219C14.7692 9.05233 15.0447 8.77681 15.3846 8.77681C15.7245 8.77681 16 9.05233 16 9.39219V14.1942C16 15.1915 15.1734 16 14.1538 16H1.84615C0.826551 16 0 15.1915 0 14.1942V9.3922C0 9.05233 0.275517 8.77681 0.615385 8.77681C0.955252 8.77681 1.23077 9.05233 1.23077 9.3922V14.1942ZM11.4619 4.14724C11.681 4.40973 11.6415 4.80107 11.3743 5.01445C11.1152 5.2214 10.7382 5.18334 10.5257 4.92877L8.61539 2.64051V12.375C8.61539 12.7148 8.33987 12.9903 8 12.9903C7.66013 12.9903 7.38462 12.7148 7.38462 12.375V2.64051L5.47434 4.92877C5.26182 5.18334 4.88482 5.2214 4.62571 5.01445C4.35853 4.80107 4.31901 4.40973 4.53813 4.14724L7.23231 0.919672C7.63207 0.440769 8.36793 0.440768 8.76769 0.919672L11.4619 4.14724Z" fill="white"/>
                             </svg>
@@ -215,7 +231,7 @@ export default {
                     </div>
                     <div class="p2pMarket_order_main_values">
                         <div style="line-height: 28px">Сделок: {{ order.count_deals }} - 100%</div>
-                        <div>{{ order.remain }} BTC</div>
+                        <div>{{ parseFloat(order.remain) }} {{ user.currenciesData?.find(item => item.coingeckoId === this.user.currencies?.find(cur => cur.id === order.currency_id)?.coingeckoId).symbol }}</div>
                         <div>{{ order.min_limit ?? "0" }} - {{ order.max_limit ?? "∞" }} RUB</div>
                         <div>{{ payments[order.payment_method] }}</div>
                     </div>
@@ -321,7 +337,7 @@ export default {
             <button @click="sendData">Провести оплату</button>
         </div>
     </div>
-    <success-component title="Сделка успешно совершена" :description="`В течение 15 минут 1 BTC будет начислен`" back-link="" @onBack="clickBack"/>
+    <success-component title="Сделка успешно совершена" :description="`В течение 15 минут ${count} ${user.currenciesData?.find(item => item.coingeckoId === this.user.currencies?.find(cur => cur.id === selectedOrder?.currency_id)?.coingeckoId)?.symbol} будет начислен`" @onBack="clickBack"/>
 </template>
 
 <style scoped>

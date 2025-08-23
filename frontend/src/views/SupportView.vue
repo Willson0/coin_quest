@@ -1,7 +1,7 @@
 <script>
 import axios from 'axios';
 import config from "@/config.json"
-import {endLoading, notify} from "@/utils.js";
+import {endLoading, notify, toLink} from "@/utils.js";
 import PhotoSlider from "@/components/PhotoSlider.vue";
 export default {
     name: "SupportView",
@@ -17,35 +17,66 @@ export default {
             scrollLeft: 0,
             isDragging: false,
             startIndex: null,
-            sliderID: -1
+            sliderID: -1,
+            firstLoading: true,
+            interval: null,
         }
     },
     async mounted () {
         window.addEventListener('mouseup', this.mouseup);
         window.addEventListener('mousemove', this.mousemove);
 
-        await axios.post(config.backend + "support", {
-            initData: window.Telegram.WebApp.initData,
-        }).then((response) => {
-            this.support = response.data;
-            endLoading("support_loading");
-        }).catch((error) => {
-            notify(error.response.data.message, 1);
-        });
+        await this.fetchData();
+        this.interval = setInterval(() => {
+            this.fetchData();
+        }, 10000);
     },
     unmounted () {
+        clearInterval(this.interval);
+
         window.removeEventListener('mouseup', this.mouseup);
         window.removeEventListener('mousemove', this.mousemove);
     },
     methods: {
+        async fetchData () {
+            await axios.post(config.backend + "support", {
+                initData: window.Telegram.WebApp.initData,
+            }).then((response) => {
+                if (this.support.id && !response.data.id) {
+                    alert ("Ваша заявка была закрыта. Спасибо за обращение!");
+                    return toLink("profile");
+                }
+
+                this.support = response.data;
+
+                if (this.firstLoading) {
+                    this.firstLoading = false;
+                    endLoading("support_loading");
+
+                    requestAnimationFrame(() => {
+                        const elem = document.querySelector('.support_dialog');
+                        elem.scrollTop = elem.scrollHeight;
+                    })
+                }
+            }).catch((error) => {
+                notify(error.response.data.message, 1);
+            });
+        },
         async sendMessage () {
             this.newMessage = this.newMessage.trim();
-            if (this.newMessage.length === 0) return;
+            if (this.newMessage.length === 0 && this.pictures.length === 0) return;
 
             this.support.dialog.push({
                 from: "user",
                 text: this.newMessage,
                 images: this.pictures.map((file) => file.preview),
+            })
+            requestAnimationFrame(() => {
+                const elem = document.querySelector('.support_dialog');
+                elem.scrollTo({
+                    top: elem.scrollHeight,
+                    behavior: 'smooth'
+                });
             })
 
             let fd = new FormData();
@@ -58,6 +89,11 @@ export default {
             this.pictures = [];
 
             await axios.post(config.backend + "support/send", fd).then((response) => {
+                if (this.support.id && !response.data.id) {
+                    alert ("Ваша заявка была закрыта. Спасибо за обращение!");
+                    return toLink("profile");
+                }
+
                 this.support = response.data;
             }).catch((error) => {
                 notify(error.response.data.message, 1);
@@ -78,6 +114,8 @@ export default {
         mousedown(ev) {
             let el = this.$refs.newsNav;
 
+            document.body.classList.add("grabbing");
+
             this.mouseDown = true;
             this.startX = ev.pageX - el.offsetLeft;
             this.scrollLeft = el.scrollLeft;
@@ -97,6 +135,8 @@ export default {
             slider.scrollLeft = this.scrollLeft - walk;
         },
         mouseup (ev) {
+            document.body.classList.remove("grabbing");
+
             this.mouseDown = false;
             setTimeout(() => {
                 this.isDragging = false;
@@ -133,7 +173,7 @@ export default {
                           : '100px'
                       }" v-for="(photo, key) in message.images" alt="" @click="startIndex = key; sliderID = keyMess;">
                 </div>
-                <div class="dialog_main_text">{{ message.text }}</div>
+                <div class="dialog_main_text" v-if="message.text">{{ message.text }}</div>
             </div>
         </div>
         <div v-if="pictures.length" class="dialog_attachment">

@@ -3,6 +3,8 @@ import {toLink} from "@/utils.js";
 
 export default {
     name: "SuccessComponent",
+    async mounted () {
+    },
     methods: {toLink},
     props: {
         title: {

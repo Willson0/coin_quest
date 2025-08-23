@@ -120,8 +120,9 @@ export default {
             <div class="adminnav_main_nav_background"></div>
             <div class="adminnav_main_nav_website">
                 <div class="adminnav_main_nav_website_logo">
+                    <img src="/logo.png" alt="">
                 </div>
-                <p>Crypto Courses</p>
+                <p>CoinQuest</p>
             </div>
             <div class="adminnav_main_nav_line"></div>
             <div class="adminnav_main_nav_main">
@@ -132,47 +133,47 @@ export default {
                 </div>
                 <div @click="$router.push('/admin/users')">
                     <div v-if="$route.path === '/admin/users'" class="adminnav_main_nav_main_el_point">&middot;</div>
-                    <i class="fa-solid fa-cart-shopping"></i>
+                    <i class="fa-solid fa-user"></i>
                     <p>Пользователи</p>
                 </div>
                 <div @click="$router.push('/admin/posts')">
                     <div v-if="$route.path === '/admin/posts'" class="adminnav_main_nav_main_el_point">&middot;</div>
-                    <i class="fa-solid fa-cart-shopping"></i>
+                    <i class="fa-solid fa-newspaper"></i>
                     <p>Новости</p>
                 </div>
                 <div @click="$router.push('/admin/courses')">
                     <div v-if="$route.path === '/admin/courses'" class="adminnav_main_nav_main_el_point">&middot;</div>
-                    <i class="fa-solid fa-cart-shopping"></i>
+                    <i class="fa-solid fa-book"></i>
                     <p>Курсы</p>
                 </div>
                 <div @click="$router.push('/admin/tournaments')">
                     <div v-if="$route.path === '/admin/tournaments'" class="adminnav_main_nav_main_el_point">&middot;</div>
-                    <i class="fa-solid fa-cart-shopping"></i>
+                    <i class="fa-solid fa-crown"></i>
                     <p>Турниры</p>
                 </div>
                 <div @click="$router.push('/admin/currencies')">
                     <div v-if="$route.path === '/admin/currencies'" class="adminnav_main_nav_main_el_point">&middot;</div>
-                    <i class="fa-solid fa-cart-shopping"></i>
+                    <i class="fa-brands fa-bitcoin"></i>
                     <p>Криптовалюты</p>
                 </div>
                 <div @click="$router.push('/admin/achievements')">
                     <div v-if="$route.path === '/admin/achievements'" class="adminnav_main_nav_main_el_point">&middot;</div>
-                    <i class="fa-solid fa-cart-shopping"></i>
+                    <i class="fa-solid fa-trophy"></i>
                     <p>Достижения</p>
                 </div>
                 <div @click="$router.push('/admin/fiats')">
                     <div v-if="$route.path === '/admin/fiats'" class="adminnav_main_nav_main_el_point">&middot;</div>
-                    <i class="fa-solid fa-cart-shopping"></i>
+                    <i class="fa-solid fa-dollar-sign"></i>
                     <p>Валюта</p>
                 </div>
                 <div @click="$router.push('/admin/orders')">
                     <div v-if="$route.path === '/admin/orders'" class="adminnav_main_nav_main_el_point">&middot;</div>
-                    <i class="fa-solid fa-cart-shopping"></i>
+                    <i class="fa-solid fa-shuffle"></i>
                     <p>P2P Ордеры</p>
                 </div>
                 <div @click="$router.push('/admin/support')">
                     <div v-if="$route.path === '/admin/support'" class="adminnav_main_nav_main_el_point">&middot;</div>
-                    <i class="fa-solid fa-cart-shopping"></i>
+                    <i class="fa-solid fa-headset"></i>
                     <p>Поддержка</p>
                 </div>
             </div>

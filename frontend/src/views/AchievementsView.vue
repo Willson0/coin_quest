@@ -1,7 +1,7 @@
 <script>
 import config from "@/config.json";
 import axios from "axios";
-import {notify} from "@/utils.js";
+import {copy, notify} from "@/utils.js";
 export default {
     name: "AchievementsView",
     data () {
@@ -9,9 +9,28 @@ export default {
             isAsc: true,
             config: config,
             isTooltip: 0,
+            sharingId: null,
         }
     },
+    mounted () {
+        if (this.$route.query.id) {
+            this.sharingId = Number(this.$route.query.id);
+
+            window.Telegram.WebApp.BackButton.offClick(window.backByQueryFunction);
+            window.Telegram.WebApp.BackButton.onClick(this.backFunction);
+            window.Telegram.WebApp.BackButton.show();
+        }
+    },
+    unmounted () {
+        window.Telegram.WebApp.BackButton.offClick(this.backFunction);
+        window.Telegram.WebApp.BackButton.onClick(window.backByQueryFunction);
+    },
     methods: {
+        backFunction () {
+            this.sharingId = null;
+            window.Telegram.WebApp.BackButton.offClick(this.backFunction);
+            window.Telegram.WebApp.BackButton.onClick(window.backByQueryFunction);
+        },
         getRussianLesson (count) {
             if (count === 1) return 'урок';
             else if (count === 2 || count === 3 || count === 4) return 'урока';
@@ -58,6 +77,10 @@ export default {
             }).catch((error) => {
                 notify(error.response.data.message, 1)
             })
+        },
+        share (id) {
+            copy(`https://t.me/${config.bot}?startapp=achievement_${id}`);
+            return this.isTooltip = 0;
         }
     },
     computed: {
@@ -73,6 +96,14 @@ export default {
                 }
             }
             return counter;
+        },
+        achievements () {
+            if (!this.user.id) return;
+
+            let achievements = this.user.achievements;
+            if (this.sharingId) achievements = achievements.filter((ach) => ach.id === this.sharingId);
+            else achievements = achievements.filter((ach) => this.countLesson >= ach.progress);
+            return achievements.sort((a, b) => this.isAsc ? a.id - b.id : b.id - a.id)
         }
     }
 }
@@ -83,17 +114,18 @@ export default {
         <div class="achievements_tooltip_pin" @click="pin(isTooltip)" v-if="!user.pinned_achievements?.includes(isTooltip)">Закрепить на витрине</div>
         <div class="achievements_tooltip_pin" @click="unpin(isTooltip)" v-else>Открепить от витрины</div>
         <hr>
-        <div class="achievements_tooltip_share">Поделиться</div>
+        <div class="achievements_tooltip_share" @click="share(isTooltip)">Поделиться</div>
     </div>
     <div class="achievements">
         <div class="achievements_title">
-            <div>Достижения</div>
+            <div v-if="sharingId">Опубликованное достижение</div>
+            <div v-else>Достижения</div>
             <svg @click="isAsc = !isAsc" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                 <path d="M4 18H8C8.55 18 9 17.55 9 17C9 16.45 8.55 16 8 16H4C3.45 16 3 16.45 3 17C3 17.55 3.45 18 4 18ZM3 7C3 7.55 3.45 8 4 8H20C20.55 8 21 7.55 21 7C21 6.45 20.55 6 20 6H4C3.45 6 3 6.45 3 7ZM4 13H14C14.55 13 15 12.55 15 12C15 11.45 14.55 11 14 11H4C3.45 11 3 11.45 3 12C3 12.55 3.45 13 4 13Z" fill="#1E1E22"/>
             </svg>
         </div>
         <div class="achievements_main">
-            <div v-for="ach in user.achievements?.sort((a, b) => isAsc ? a.id - b.id : b.id - a.id)" v-show="countLesson >= ach.progress">
+            <div v-for="ach in achievements">
                 <img :src="config.storage + ach.image" alt="">
                 <div class="achievements_main_info">
                     <div class="achievements_main_info_title">
@@ -105,7 +137,7 @@ export default {
                     </div>
                     <div class="achievements_main_info_description">Пройдите {{ ach.progress }} {{ getRussianLesson(ach.progress) }}</div>
                 </div>
-                <svg @click="showTooltip($event, ach.id)" xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36" fill="none">
+                <svg v-if="!sharingId" @click="showTooltip($event, ach.id)" xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36" fill="none">
                     <circle cx="10" cy="18" r="2" fill="#1E1E22"/>
                     <circle cx="18" cy="18" r="2" fill="#1E1E22"/>
                     <circle cx="26" cy="18" r="2" fill="#1E1E22"/>

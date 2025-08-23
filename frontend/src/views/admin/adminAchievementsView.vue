@@ -17,12 +17,14 @@ export default {
             editIndex: null,
             editForm: {
                 image: '',
-                progress: 0
+                progress: 0,
+                title: "",
             },
             newAchievement: {
                 image: null,    // Сохраняем сам файл
                 preview: '',    // Сюда положим base64-картинку для превью
-                progress: 0
+                progress: 0,
+                title: "",
             },
             config: config,
         };
@@ -53,6 +55,7 @@ export default {
             let fd = new FormData();
             if (this.editForm.file) fd.append('image', this.editForm.file);
             fd.append('progress', this.editForm.progress);
+            fd.append('title', this.editForm.title);
 
             await axios.post(config.backend + 'admin/achievements/' + idx, fd, {withCredentials: true}).then((response) => {
                 this.achievements = response.data;
@@ -103,6 +106,7 @@ export default {
             let fd = new FormData();
             fd.append('image', this.newAchievement.image);
             fd.append('progress', this.newAchievement.progress);
+            fd.append('title', this.newAchievement.title);
 
             await axios.post(config.backend + 'admin/achievements', fd, {withCredentials: true}).then((response) => {
                 this.achievements = response.data;
@@ -132,7 +136,13 @@ export default {
                 type="number"
                 min="0"
                 max="100"
-                placeholder="Прогресс, %"
+                placeholder="Прогресс, уроков"
+            />
+            <input
+                v-model.number="newAchievement.title"
+                class="edit-input short"
+                type="text"
+                placeholder="Заголовок" style="width: 150px;"
             />
             <button class="save-btn" @click="addAchievement">Добавить</button>
         </div>
@@ -140,6 +150,7 @@ export default {
             <thead>
             <tr>
                 <th>Изображение</th>
+                <th>Название</th>
                 <th>Прогресс</th>
                 <th>Действия</th>
             </tr>
@@ -159,6 +170,19 @@ export default {
                 </td>
                 <td>
             <span v-if="!isEditing(idx)">
+              {{ achievement.title }}
+            </span>
+                    <input
+                        v-else
+                        v-model.number="editForm.title"
+                        type="text"
+                        class="edit-input short"
+                        placeholder="Title"
+                        style="width: 150px;"
+                    />
+                </td>
+                <td>
+            <span v-if="!isEditing(idx)">
               {{ achievement.progress }} уроков
             </span>
                     <input
@@ -166,9 +190,8 @@ export default {
                         v-model.number="editForm.progress"
                         type="number"
                         min="0"
-                        max="100"
                         class="edit-input short"
-                        placeholder="Progress %"
+                        placeholder="Progress"
                     />
                 </td>
                 <td>

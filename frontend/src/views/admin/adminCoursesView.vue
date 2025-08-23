@@ -66,7 +66,7 @@
                     }).then((response) => {
                         alert('Курс сохранен');
                         this.courses = response.data.courses;
-                        this.selectedCourse = {...this.courses.find(a => a.id === this.selectedCourse.id)};
+                        this.selectedCourse = null;
                     });
                 } else {
                     axios.post(config.backend + "admin/courses", this.selectedCourse, {
@@ -82,6 +82,10 @@
                 if (!this.selectedLesson) return alert("Выберите урок!");
                 if (!confirm("Вы уверены, что хотите удалить урок?")) return;
 
+                if (!this.selectedLesson.id) {
+                    alert("Урок не сохранен. Удаление невозможно!");
+                }
+
                 axios.delete(config.backend + "admin/lessons/" + this.selectedLesson.id, {
                     withCredentials: true
                 }).then((response) => {
@@ -89,6 +93,7 @@
                     this.selectedLesson = null;
                     this.courses = response.data.courses;
                     this.selectedCourse = {...this.courses.find(a => a.id === this.selectedCourse.id)};
+                    this.selectedLesson.isExam = this.selectedLesson.count_tries > 0;
                     togglePopup('courses_overlay');
                 })
             },
@@ -99,7 +104,7 @@
 
                     for (let key in this.selectedLesson) {
                         if (key === 'isExam') fd.append('count_tries', 2);
-                        else if (this.selectedLesson[key] !== oldLesson[key]) fd.append(key, this.selectedLesson[key]);
+                        else if (JSON.stringify(this.selectedLesson[key]) !== JSON.stringify(oldLesson[key])) fd.append(key, JSON.stringify(this.selectedLesson[key]));
                     }
 
                     axios.post(config.backend + "admin/lessons/" + this.selectedLesson.id, fd, {
@@ -108,6 +113,8 @@
                         alert('Курс сохранен');
                         this.courses = response.data.courses;
                         this.selectedLesson = {...this.courses.find(a => a.id === this.selectedCourse.id).lessons.find(a => a.id === this.selectedLesson.id)};
+                        this.selectedLesson.questions = JSON.parse(this.selectedLesson.questions);
+                        this.selectedLesson.isExam = this.selectedLesson.count_tries > 0;
                     });
                 } else {
                     axios.post(config.backend + "admin/lessons", this.selectedLesson, {
@@ -116,6 +123,8 @@
                         alert('Курс сохранен');
                         this.courses = response.data.courses;
                         this.selectedLesson = {...this.courses.find(a => a.id === this.selectedCourse.id).lessons.find(a => a.number === this.selectedLesson.number)};
+                        this.selectedLesson.isExam = this.selectedLesson.count_tries > 0;
+                        this.selectedLesson.questions = JSON.parse(this.selectedLesson.questions);
                     }).catch((error) => {
                         alert (error.response.data.message ?? error.response.data);
                     });

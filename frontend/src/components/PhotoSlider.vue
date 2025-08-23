@@ -69,6 +69,9 @@ export default {
             }
             // анимация возвращения на место
             this.dragOffset = 0;
+        },
+        backFunction () {
+            this.$emit('close');
         }
     },
     mounted() {
@@ -78,23 +81,13 @@ export default {
         });
         this.index = this.startIndex;
 
-        let oldVisible = window.Telegram.WebApp.BackButton.isVisible;
         window.Telegram.WebApp.BackButton.offClick(window.backByQueryFunction);
-
-        let firstOnClick = true;
-        window.Telegram.WebApp.BackButton.onClick(() => {
-            if (firstOnClick) {
-                firstOnClick = false;
-
-                this.$emit('close');
-                if (!oldVisible) window.Telegram.WebApp.BackButton.hide();
-
-                let query = {...this.$route.query};
-                query["backfunction"] = 1;
-                this.$router.push({ query: query});
-            }
-        });
+        window.Telegram.WebApp.BackButton.onClick(this.backFunction);
         window.Telegram.WebApp.BackButton.show();
+    },
+    unmounted () {
+        window.Telegram.WebApp.BackButton.offClick(this.backFunction);
+        window.Telegram.WebApp.BackButton.onClick(window.backByQueryFunction);
     }
 };
 </script>

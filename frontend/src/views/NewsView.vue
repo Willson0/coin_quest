@@ -41,6 +41,8 @@ export default {
             this.mouseDown = true;
             this.startX = ev.pageX - el.offsetLeft;
             this.scrollLeft = el.scrollLeft;
+
+            document.body.classList.add("grabbing");
         },
         mousemove (ev) {
             if (!this.mouseDown) return;
@@ -57,6 +59,8 @@ export default {
             slider.scrollLeft = this.scrollLeft - walk;
         },
         mouseup (ev) {
+            document.body.classList.remove("grabbing");
+
             this.mouseDown = false;
             setTimeout(() => {
                 this.isDragging = false;
@@ -93,6 +97,9 @@ export default {
                 this.isLoading = false;
             });
         },
+        openLink (link) {
+            window.Telegram.WebApp.openLink(link);
+        }
     },
     computed: {
         user () {
@@ -115,7 +122,7 @@ export default {
                  v-for="category in user.news">{{ category.name }}</div>
         </div>
         <div class="news_main">
-            <div v-for="post in selectedCategory === -1 ? user.allNews : user.news.find(item => item.id === selectedCategory).news">
+            <div @click="post.link ? openLink(post.link) : ''" v-for="post in selectedCategory === -1 ? user.allNews : user.news.find(item => item.id === selectedCategory).news">
                 <div class="news_main_photo">
                     <img :src="(post.image.startsWith('https') ? post.image : config.storage + post.image)" alt="">
                     <div class="news_main_photo_category">{{ user.news.find(item => item.id === post.category_id).name }}</div>

@@ -13,6 +13,7 @@ use App\Http\Requests\AdminUpdateAchievementRequest;
 use App\Http\Requests\AdminUpdateCourseRequest;
 use App\Http\Requests\AdminUpdateCurrencyRequest;
 use App\Http\Requests\AdminUpdateFiatRequest;
+use App\Http\Requests\AdminUpdateLessonRequest;
 use App\Http\Requests\adminUpdateNewsCategoryRequest;
 use App\Http\Requests\AdminUpdateNewsRequest;
 use App\Http\Requests\AdminUpdateOrderRequest;
@@ -39,6 +40,7 @@ use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use stdClass;
+use Telegram\Bot\Laravel\Facades\Telegram;
 
 class AdminController extends Controller
 {
@@ -162,13 +164,13 @@ class AdminController extends Controller
         return $this->courses();
     }
 
-    public function updateLesson (Lesson $lesson, AdminUpdateCourseRequest $request) {
+    public function updateLesson (Lesson $lesson, AdminUpdateLessonRequest $request) {
         $validate = $request->validated();
         $courseId = $lesson->course_id;
 
-        if (isset($validated['number']) && $validated['number'] != $lesson->number) {
+        if (isset($validate['number']) && $validate['number'] != $lesson->number) {
             $oldNumber = $lesson->number;
-            $newNumber = $validated['number'];
+            $newNumber = $validate['number'];
 
             if ($newNumber < $oldNumber) {
                 Lesson::where('course_id', $courseId)
@@ -180,10 +182,22 @@ class AdminController extends Controller
                     ->decrement('number');
             }
 
-            $validate->number = $newNumber;
+            $validate['number'] = $newNumber;
+        }
+        $lesson->update($validate);
+
+        $lessons = Lesson::where('course_id', $courseId)
+            ->orderBy('number')
+            ->get();
+        $number = 1;
+        foreach ($lessons as $lesson) {
+            if ($lesson->number != $number) {
+                $lesson->number = $number;
+                $lesson->save();
+            }
+            $number++;
         }
 
-        $lesson->update($validate);
         return $this->courses();
     }
 
@@ -208,6 +222,19 @@ class AdminController extends Controller
         $lesson["videos"] = json_encode($lesson["videos"], true);
 
         Lesson::create($lesson);
+
+        $lessons = Lesson::where('course_id', $courseId)
+            ->orderBy('number')
+            ->get();
+        $number = 1;
+        foreach ($lessons as $lesson) {
+            if ($lesson->number != $number) {
+                $lesson->number = $number;
+                $lesson->save();
+            }
+            $number++;
+        }
+
         return $this->courses();
     }
 
@@ -415,6 +442,16 @@ class AdminController extends Controller
     public function supportClose (Support $support) {
         $support->is_closed = true;
         $support->save();
+
+        try {
+            $user = User::find($support->user_id);
+            Telegram::sendMessage([
+                "chat_id" => $user->telegram_id,
+                "text" => "*🚫 Администратор закрыл чат поддержки*",
+                "parse_mode" => "MarkdownV2"
+            ]);
+        } catch (\Exception $e) {}
+
         return $this->supports();
     }
 
@@ -451,6 +488,15 @@ class AdminController extends Controller
         $support->dialog = $dialog;
 
         $support->save();
+
+        try {
+            $user = User::find($support->user_id);
+            Telegram::sendMessage([
+                "chat_id" => $user->telegram_id,
+                "text" => "*🔔 Вам пришло новое сообщение в поддержку*",
+                "parse_mode" => "MarkdownV2"
+            ]);
+        } catch (\Exception $e) {}
 
         return $this->supports();
     }
