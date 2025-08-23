@@ -486,6 +486,7 @@ input[type="number"] {
     outline: none;
     font-size: 16px;
     font-weight: 500;
+    width: 100%;
 }
 .courses_search>input::placeholder {
     color: var(--inactive)
@@ -1236,6 +1237,7 @@ input[type="number"] {
     background-color: transparent;
     font-size: 16px;
     line-height: 22px;
+    width: 100%;
 }
 .shop_inputs>div>input::placeholder,
 .shop_inputs_main>input::placeholder {
