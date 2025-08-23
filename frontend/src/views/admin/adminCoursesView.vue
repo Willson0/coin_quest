@@ -103,7 +103,17 @@
                     let fd = new FormData();
 
                     for (let key in this.selectedLesson) {
-                        if (key === 'isExam') fd.append('count_tries', 2);
+                        if (key === 'isExam') {
+                            if (this.selectedLesson[key]) fd.append('count_tries', 2);
+                            else fd.append('count_tries', 0);
+                        }
+                        if (key === "count_tries") {
+                            if (this.selectedLesson[key] > 0) {
+                                fd.append('count_tries', 2);
+                            } else {
+                                fd.append('count_tries', 0);
+                            }
+                        }
                         else if (JSON.stringify(this.selectedLesson[key]) !== JSON.stringify(oldLesson[key])) fd.append(key, JSON.stringify(this.selectedLesson[key]));
                     }
 
