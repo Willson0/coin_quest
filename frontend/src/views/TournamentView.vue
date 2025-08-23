@@ -78,10 +78,10 @@ export default {
             console.log(this.closestTournament.date_start);
             let endDate = new Date(this.closestTournament.date_end.replace(' ', 'T') + '+03:00');
 
-            return `${startDate.getDate().toString().padStart(2, "0")}.${(startDate.getMonth() + 1).toString().padStart(2, "0")}ㅤ${startDate.getHours().toString().padStart(2, "0")}:${startDate.getMinutes().toString().padStart(2, "0")} ` +
+            return `${startDate.getDate().toString().padStart(2, "0")}.${(startDate.getMonth() + 1).toString().padStart(2, "0")}   ${startDate.getHours().toString().padStart(2, "0")}:${startDate.getMinutes().toString().padStart(2, "0")} ` +
                 '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="2" viewBox="0 0 28 2" fill="none">' +
                 '<path d="M0 1L28 1" stroke="#818181"/>' +
-                '</svg>' + ` ${endDate.getDate().toString().padStart(2, "0")}.${(endDate.getMonth() + 1).toString().padStart(2, "0")}ㅤ${endDate.getHours().toString().padStart(2, "0")}:${endDate.getMinutes().toString().padStart(2, "0")}`
+                '</svg>' + ` ${endDate.getDate().toString().padStart(2, "0")}.${(endDate.getMonth() + 1).toString().padStart(2, "0")}   ${endDate.getHours().toString().padStart(2, "0")}:${endDate.getMinutes().toString().padStart(2, "0")}`
         }
     },
     unmounted () {
