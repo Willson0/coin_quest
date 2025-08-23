@@ -107,13 +107,6 @@
                             if (this.selectedLesson[key]) fd.append('count_tries', 2);
                             else fd.append('count_tries', 0);
                         }
-                        else if (key === "count_tries") {
-                            if (this.selectedLesson[key] > 0) {
-                                fd.append('count_tries', 2);
-                            } else {
-                                fd.append('count_tries', 0);
-                            }
-                        }
                         else if (JSON.stringify(this.selectedLesson[key]) !== JSON.stringify(oldLesson[key])) fd.append(key, JSON.stringify(this.selectedLesson[key]));
                     }
 
@@ -129,6 +122,8 @@
                         this.selectedLesson = null;
                     });
                 } else {
+                    if (this.selectedLesson.isExam) this.selectedLesson.count_tries = 2;
+
                     axios.post(config.backend + "admin/lessons", this.selectedLesson, {
                         withCredentials: true
                     }).then((response) => {
