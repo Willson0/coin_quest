@@ -91,15 +91,17 @@ export default {
 
         window.Telegram.WebApp.expand();
         window.Telegram.WebApp.disableVerticalSwipes();
-        if (window.Telegram.WebApp.initDataUnsafe.start_param ) {
-            const params = window.Telegram.WebApp.initDataUnsafe.start_param.split("_");
+        if (window.Telegram.WebApp.initDataUnsafe.start_param) {
+            let origParams = decodeURIComponent(window.Telegram.WebApp.initDataUnsafe.start_param);
+            const params = origParams.split("_");
 
             const sessionKey = 'tg_start_param';
             if (!sessionStorage.getItem(sessionKey)) {
                 if (/^[0-9]+$/.test(params[1]) && Number(params[1]) >= 0)  {
                     if (params[0] === "achievement") toLink("achievements", params[1])
                     else if (params[0] === "order") toLink("topup_p2p_market", params[1])
-                } else this.$router.push({ query: { s: 'profile' }});
+                } else if (params[0] === "wallet") toLink("sendwallet", params[1])
+                else this.$router.push({ query: { s: 'profile' }});
 
                 sessionStorage.setItem(sessionKey, "1")
             }

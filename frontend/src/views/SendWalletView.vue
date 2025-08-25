@@ -17,6 +17,9 @@ export default {
         }
     },
     async mounted () {
+        if (this.$route.query.id) {
+            this.wallet = this.$route.query.id;
+        }
     },
     methods: {
         openOverlay,

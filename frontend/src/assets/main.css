@@ -2304,6 +2304,14 @@ input[type="number"] {
     font-size: 16px;
     word-break: break-all;
 }
+.topupWallet_qr {
+    margin: 0 auto;
+    -webkit-border-radius: 16px;
+    -moz-border-radius: 16px;
+    border-radius: 16px;
+    box-shadow: 0 0 6px 0 rgba(74, 74, 74, 0.25);
+    /*border: 1px solid var(--grey-second);*/
+}
 
 
 /* П2П МАРКЕТ */
