@@ -98,7 +98,7 @@ class AuthController extends Controller
                 if (count($inArray) > 0)
                     $sql .= " where lesson_id in (".implode(',', $inArray).")";
             }
-            else $sql .= " where created_at between {$user->tournament->date_start} and {$user->tournament->date_end}";
+            else $sql .= " where created_at between '{$user->tournament->date_start}' and '{$user->tournament->date_end}'";
 
             $result = DB::table(DB::raw("($sql) t"))
                 ->join('users as u', 'u.id', '=', 't.user_id')
