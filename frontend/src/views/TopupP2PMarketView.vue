@@ -29,6 +29,7 @@ export default {
             selectedOrder: null,
             inFiat: true,
             sharingId: null,
+            buyedCount: 0,
         }
     },
     async mounted () {
@@ -78,6 +79,8 @@ export default {
 
             let count = this.count;
             if (this.inFiat) count = this.count / this.selectedOrder.price;
+            this.buyedCount = count;
+
             let price = this.count * this.selectedOrder.price;
 
             if (count > this.selectedOrder.remain) return notify("У Ордера нет столько криптовалюты", 1);
@@ -338,7 +341,7 @@ export default {
             <button @click="sendData">Провести оплату</button>
         </div>
     </div>
-    <success-component title="Сделка успешно совершена" :description="`В течение 15 минут ${count} ${user.currenciesData?.find(item => item.coingeckoId === this.user.currencies?.find(cur => cur.id === selectedOrder?.currency_id)?.coingeckoId)?.symbol} будет начислен`" @onBack="clickBack"/>
+    <success-component title="Сделка успешно совершена" :description="`В течение 15 минут ${buyedCount} ${user.currenciesData?.find(item => item.coingeckoId === this.user.currencies?.find(cur => cur.id === selectedOrder?.currency_id)?.coingeckoId)?.symbol} будет начислен`" @onBack="clickBack"/>
 </template>
 
 <style scoped>
