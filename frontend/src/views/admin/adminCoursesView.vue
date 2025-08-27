@@ -12,7 +12,8 @@
                 selectedCourse: null,
                 selectedLesson: null,
                 expandedQuestionIndex: null,
-
+                newFile: null,
+                config: config,
             }
         },
         components: {
@@ -31,9 +32,17 @@
         methods: {
             deleteCourse() {
                 if (!this.selectedCourse) alert("Выберите курс!");
+                if (!this.selectedCourse.id) {
+                    const index = this.courses.findLastIndex(a => a.title === this.selectedCourse.title);
+                    if (index !== -1) {
+                        this.courses.splice(index, 1);
+                    }
+                    return this.selectedCourse = null;
+                }
+
                 if (!confirm("Вы уверены, что хотите удалить курс?")) return;
 
-                axios.delete(config.backend + "admin/courses/" + this.selectedCourse, {
+                axios.delete(config.backend + "admin/courses/" + this.selectedCourse.id, {
                     withCredentials: true
                 }).then((response) => {
                     alert('Курс удален');
@@ -74,7 +83,11 @@
                     }).then((response) => {
                         alert('Курс сохранен');
                         this.courses = response.data.courses;
-                        this.selectedCourse = {...this.courses.lessons[-1] };
+
+                        const index = this.courses.findLastIndex(a => a.title === this.selectedCourse.title);
+                        if (index !== -1) {
+                            this.selectedCourse = this.courses[index];
+                        } else this.selectedCourse = null;
                     }).catch((error) => {});
                 }
             },
@@ -112,12 +125,14 @@
                             else fd.append(key, JSON.stringify(this.selectedLesson[key]));
                         }
                     }
+                    if (this.newFile) fd.append('file', this.newFile);
 
                     axios.post(config.backend + "admin/lessons/" + this.selectedLesson.id, fd, {
                         withCredentials: true
                     }).then((response) => {
                         alert('Курс сохранен');
                         this.courses = response.data.courses;
+                        this.selectedCourse = {...this.courses.find(a => a.id === this.selectedCourse.id)};
                         // this.selectedLesson = {...this.courses.find(a => a.id === this.selectedCourse.id).lessons.find(a => a.id === this.selectedLesson.id)};
                         // this.selectedLesson.questions = JSON.parse(this.selectedLesson.questions);
                         // this.selectedLesson.isExam = this.selectedLesson.count_tries > 0;
@@ -126,15 +141,23 @@
                     });
                 } else {
                     if (this.selectedLesson.isExam) this.selectedLesson.count_tries = 2;
+                    if (!this.newFile) return alert("Выберите файл!");
 
-                    axios.post(config.backend + "admin/lessons", this.selectedLesson, {
+                    let fd = new FormData();
+                    for (let key in this.selectedLesson) {
+                        if (typeof this.selectedLesson[key] === 'string') fd.append(key, this.selectedLesson[key]);
+                        else fd.append(key, JSON.stringify(this.selectedLesson[key]));
+                    }
+                    fd.append('file', this.newFile);
+
+                    axios.post(config.backend + "admin/lessons", fd, {
                         withCredentials: true
                     }).then((response) => {
                         alert('Курс сохранен');
                         this.courses = response.data.courses;
-                        this.selectedLesson = {...this.courses.find(a => a.id === this.selectedCourse.id).lessons.find(a => a.number === this.selectedLesson.number)};
-                        this.selectedLesson.isExam = this.selectedLesson.count_tries > 0;
-                        this.selectedLesson.questions = JSON.parse(this.selectedLesson.questions);
+                        this.selectedCourse = {...this.courses.find(a => a.id === this.selectedCourse.id)};
+                        togglePopup('courses_overlay');
+                        this.selectedLesson = null;
                     }).catch((error) => {
                         alert (error.response.data.message ?? error.response.data);
                     });
@@ -234,8 +257,8 @@
                     <label class="label">VK Video URL</label>
                     <input v-model="selectedLesson.videos.vk" class="input" id="l_vk" placeholder="https://vk.com/video/..."> </div>
                 <div class="form-row">
-                    <label class="label">RuTube URL</label>
-                    <input v-model="selectedLesson.videos.rutube" class="input" id="l_rutube" placeholder="https://rutube.ru/video/..."> </div>
+                    <label class="label">File: <a style="text-decoration: underline" v-if="selectedLesson.file" :href="config.storage + selectedLesson.file">нынешний</a></label>
+                    <input @change="newFile = $event.target.files[0]" class="input" type="file" id="l_rutube" placeholder="https://rutube.ru/video/..."> </div>
                 <div class="form-row" >
                     <label class="label">YouTube URL</label>
                     <input v-model="selectedLesson.videos.youtube" class="input" id="l_youtube" placeholder="https://youtu.be/..."> </div>
@@ -260,9 +283,14 @@
                         <i @click="moveItemInPlace(selectedLesson.questions, key, key+1)" class="fa-solid fa-chevron-down" v-if="key !== selectedLesson.questions.length - 1"></i>
                         <input v-model="question.question" class="question-title">
                         <button
-                            class="show-answers-btn"
+                            class="show-answers-btn" style="margin-left: auto"
                             @click="toggleAnswers(key)">
                             Ответы
+                        </button>
+                        <button
+                            class="show-answers-btn" style="background-color: red; margin-left: 0;"
+                            @click="selectedLesson.questions.splice(key, 1);">
+                            Удалить
                         </button>
                     </div>
                     <div v-if="expandedQuestionIndex === key" class="answers-menu">
@@ -358,7 +386,7 @@
                                         <label class="label">Изменён</label>
                                         <input :value="formatDateUTC(selectedCourse.updated_at)" class="input readonly" id="c_updated" readonly> </div>
                                     <button @click="saveCourse" style="text-align:center; display: block !important" class="btn" id="deleteCourseBtn" title="Удалить курс">
-                                        Сохранить
+                                        {{ selectedCourse.id ? "Сохранить" : "Создать" }}
                                     </button>
                                 </div>
 

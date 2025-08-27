@@ -1,7 +1,7 @@
 <script>
 import axios from 'axios'
 import config from '@/config.json'
-import {endLoading, startLoading, toLink} from "@/utils.js";
+import {endLoading, getFileIcon, startLoading, toLink} from "@/utils.js";
 export default {
     name: "LessonView",
     data () {
@@ -12,9 +12,11 @@ export default {
             result: null,
             isCourseRestart: false,
             realResult: null,
+            config: config,
         }
     },
     methods: {
+        getFileIcon,
         toLink,
         openUrl (url) {
             window.Telegram.WebApp.openLink(url);
@@ -82,6 +84,15 @@ export default {
         },
         prevQuestion () {
             this.lessonNumber--;
+        },
+        download(url) {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = url.split('/').pop();
+            a.target = '_blank';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
         }
     },
     computed: {
@@ -137,14 +148,15 @@ export default {
         <div class="lesson_theory_count">{{ lesson.oldResult ?? 0 }} / 100 баллы</div>
         <div class="lesson_theory_description">{{ lesson.description }}</div>
         <div class="lesson_theory_videos">
-            <div class="lesson_theory_videos_title">Видеоматериалы</div>
+            <div class="lesson_theory_videos_title">Материалы</div>
             <div class="lesson_theory_videos_list">
-                <div @click="openUrl(lesson.videos.rutube)">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="33" height="33" viewBox="0 0 33 33" fill="none">
-                        <path d="M8.2824 32.5H24.7144C29.012 32.5 32.4968 29.0152 32.4968 24.7176V8.2824C32.5 3.9944 29.028 0.5128 24.74 0.5H8.26C3.972 0.5128 0.5 3.9944 0.5 8.2824V24.7144C0.5 29.0152 3.9848 32.5 8.2824 32.5Z" fill="#100943"/>
-                        <path d="M24.74 0.5H16.5C16.5 9.3352 23.6648 16.5 32.5 16.5V8.2824C32.5 3.9944 29.028 0.5128 24.74 0.5Z" fill="#ED143B"/>
-                        <path d="M20.2664 15.7704H10.8136V12.0296H20.2664C20.82 12.0296 21.204 12.1256 21.396 12.2952C21.588 12.4648 21.7096 12.7752 21.7096 13.2296V14.5736C21.7096 15.0536 21.5912 15.364 21.396 15.5336C21.204 15.7 20.82 15.7704 20.2664 15.7704ZM20.916 8.5H6.80396V24.5H10.8136V19.2936H18.2024L21.7064 24.5H26.196L22.3304 19.2712C23.7544 19.06 24.3944 18.6216 24.9224 17.9048C25.4504 17.1848 25.716 16.0328 25.716 14.5V13.3C25.716 12.388 25.62 11.668 25.4504 11.1176C25.2808 10.5672 24.996 10.0872 24.5864 9.6552C24.1544 9.2456 23.6744 8.9608 23.0984 8.7688C22.5224 8.596 21.8024 8.5 20.916 8.5Z" fill="white"/>
-                    </svg>
+                <div @click="download(config.storage + lesson.file)">
+<!--                    <svg xmlns="http://www.w3.org/2000/svg" width="33" height="33" viewBox="0 0 33 33" fill="none">-->
+<!--                        <path d="M8.2824 32.5H24.7144C29.012 32.5 32.4968 29.0152 32.4968 24.7176V8.2824C32.5 3.9944 29.028 0.5128 24.74 0.5H8.26C3.972 0.5128 0.5 3.9944 0.5 8.2824V24.7144C0.5 29.0152 3.9848 32.5 8.2824 32.5Z" fill="#100943"/>-->
+<!--                        <path d="M24.74 0.5H16.5C16.5 9.3352 23.6648 16.5 32.5 16.5V8.2824C32.5 3.9944 29.028 0.5128 24.74 0.5Z" fill="#ED143B"/>-->
+<!--                        <path d="M20.2664 15.7704H10.8136V12.0296H20.2664C20.82 12.0296 21.204 12.1256 21.396 12.2952C21.588 12.4648 21.7096 12.7752 21.7096 13.2296V14.5736C21.7096 15.0536 21.5912 15.364 21.396 15.5336C21.204 15.7 20.82 15.7704 20.2664 15.7704ZM20.916 8.5H6.80396V24.5H10.8136V19.2936H18.2024L21.7064 24.5H26.196L22.3304 19.2712C23.7544 19.06 24.3944 18.6216 24.9224 17.9048C25.4504 17.1848 25.716 16.0328 25.716 14.5V13.3C25.716 12.388 25.62 11.668 25.4504 11.1176C25.2808 10.5672 24.996 10.0872 24.5864 9.6552C24.1544 9.2456 23.6744 8.9608 23.0984 8.7688C22.5224 8.596 21.8024 8.5 20.916 8.5Z" fill="white"/>-->
+<!--                    </svg>-->
+                    <i :class="`fas ${getFileIcon(lesson.file)}`"></i>
                 </div>
                 <div @click="openUrl(lesson.videos.vk)">
                     <svg xmlns="http://www.w3.org/2000/svg" width="33" height="33" viewBox="0 0 33 33" fill="none">

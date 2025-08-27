@@ -24,11 +24,12 @@ class AdminCreateLessonRequest extends FormRequest
         return [
             "title" => "required|string|max:255",
             "description" => "required|string",
-            "videos" => "required|array",
-            "questions" => "required|array",
+            "videos" => "required|json",
+            "questions" => "required|json",
             "course_id" => "required|exists:courses,id",
             "number" => "required|integer",
             "count_tries" => "integer",
+            "file" => "file",
         ];
     }
 }

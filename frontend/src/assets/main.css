@@ -110,6 +110,7 @@ input[type="number"] {
     /*gap: 8px;*/
     cursor: pointer;
     transition: 0.2s;
+    width: 55px;
 }
 /*.nav>div.active {*/
 /*    background-color: #B963FF;*/
@@ -1488,10 +1489,12 @@ input[type="number"] {
     display: flex;
     cursor: pointer;
 }
-.lesson_theory_videos_list>div>svg {
+.lesson_theory_videos_list>div>svg,
+.lesson_theory_videos_list>div>i {
     margin: auto;
     height: 29.36%;
     aspect-ratio: 1/1;
+    font-size:30px;
 }
 .lesson_theory>button,
 .lesson_test_question_container>button,

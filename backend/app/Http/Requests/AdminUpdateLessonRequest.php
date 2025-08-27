@@ -29,6 +29,7 @@ class AdminUpdateLessonRequest extends FormRequest
             "course_id" => "nullable|exists:courses,id",
             "number" => "nullable|integer",
             "count_tries" => "integer",
+            "file" => "nullable|file",
         ];
     }
 }

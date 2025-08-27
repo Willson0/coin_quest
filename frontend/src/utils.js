@@ -282,3 +282,28 @@ export function formatPrice(number, decimals = 0) {
     parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
     return decimals > 0 ? parts.join('.') : parts[0];
 }
+
+export function getFileIcon (filename) {
+    if (!filename) return;
+    const formatIcons = {
+        pdf: 'fa-file-pdf',
+        svg: 'fa-file-image',
+        ppt: 'fa-file-powerpoint',
+        pptx: 'fa-file-powerpoint',
+        doc: 'fa-file-word',
+        docx: 'fa-file-word',
+        xls: 'fa-file-excel',
+        xlsx: 'fa-file-excel',
+        png: 'fa-file-image',
+        jpg: 'fa-file-image',
+        jpeg: 'fa-file-image',
+        txt: 'fa-file-alt',
+        zip: 'fa-file-archive',
+        rar: 'fa-file-archive',
+        mp3: 'fa-file-audio',
+        default: 'fa-file'
+    };
+
+    const ext = filename.split('.').pop().toLowerCase();
+    return formatIcons[ext] || formatIcons.default;
+}

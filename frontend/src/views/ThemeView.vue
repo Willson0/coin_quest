@@ -80,7 +80,13 @@ export default {
             <div v-if="course.lessons?.length === 0">Тут пока что ничего нет...</div>
             <div class="theme_lessons_main">
                 <lesson-component v-for="les in course.lessons" :lesson="les"
-                      :is-locked="(les.number !== 1 && ((course.lessons?.find(lesson => lesson.number === les.number-1)?.user_points) == null))"/>
+                                  :is-locked="les.number !== 1 && (() => {
+                                        const prev = course.lessons?.find(lesson => lesson.number === les.number - 1);
+                                        if (!prev) return true;
+                                        if (!(prev.count_tries > 0)) return false;
+                                        return prev.user_points < 50;
+                                    })()"
+                />
             </div>
         </div>
 <!--        <lesson-component class="theme_exam" tries="2"/>-->

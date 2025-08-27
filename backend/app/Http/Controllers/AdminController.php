@@ -184,6 +184,16 @@ class AdminController extends Controller
 
             $validate['number'] = $newNumber;
         }
+        if ($request->has("file")) {
+            if ($lesson->file) Storage::disk("public")->delete($lesson->file);
+
+            $picture = $request->file("file");
+            $time = time();
+            $url = "lesson/image_$time" . "." . $picture->extension();
+            Storage::disk("public")->putFileAs("lesson", $picture, "image_$time" . "." . $picture->extension());
+            $validate["file"] = $url;
+        }
+
         $lesson->update($validate);
 
         $lessons = Lesson::where('course_id', $courseId)
@@ -218,8 +228,11 @@ class AdminController extends Controller
                 ->decrement('number');
         }
 
-        $lesson["questions"] = json_encode($lesson["questions"], true);
-        $lesson["videos"] = json_encode($lesson["videos"], true);
+        $picture = $request->file("file");
+        $time = time();
+        $url = "lesson/image_$time" . "." . $picture->extension();
+        Storage::disk("public")->putFileAs("lesson", $picture, "image_$time" . "." . $picture->extension());
+        $lesson["file"] = $url;
 
         Lesson::create($lesson);
 
