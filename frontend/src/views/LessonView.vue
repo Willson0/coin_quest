@@ -150,7 +150,7 @@ export default {
         <div class="lesson_theory_videos">
             <div class="lesson_theory_videos_title">Материалы</div>
             <div class="lesson_theory_videos_list">
-                <div @click="download(config.storage + lesson.file)">
+                <div @click="openUrl(config.storage + lesson.file)">
 <!--                    <svg xmlns="http://www.w3.org/2000/svg" width="33" height="33" viewBox="0 0 33 33" fill="none">-->
 <!--                        <path d="M8.2824 32.5H24.7144C29.012 32.5 32.4968 29.0152 32.4968 24.7176V8.2824C32.5 3.9944 29.028 0.5128 24.74 0.5H8.26C3.972 0.5128 0.5 3.9944 0.5 8.2824V24.7144C0.5 29.0152 3.9848 32.5 8.2824 32.5Z" fill="#100943"/>-->
 <!--                        <path d="M24.74 0.5H16.5C16.5 9.3352 23.6648 16.5 32.5 16.5V8.2824C32.5 3.9944 29.028 0.5128 24.74 0.5Z" fill="#ED143B"/>-->
