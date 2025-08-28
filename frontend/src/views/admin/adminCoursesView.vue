@@ -178,20 +178,19 @@
             addAnswer(questionIdx) {
                 this.selectedLesson.questions[questionIdx].answers.push( "Новый ответ");
                 if (
-                    typeof this.selectedLesson.questions[questionIdx].correctAnswerIndex !==
+                    typeof this.selectedLesson.questions[questionIdx].right_answer !==
                     "number"
                 ) {
-                    this.selectedLesson.questions[questionIdx].correctAnswerIndex = 0;
+                    this.selectedLesson.questions[questionIdx].right_answer = 0;
                 }
             },
             deleteAnswer(questionIdx, answerIdx) {
                 this.selectedLesson.questions[questionIdx].answers.splice(answerIdx, 1);
-                // Если удалили правильный — сбросить correctAnswerIndex если что
                 const question = this.selectedLesson.questions[questionIdx];
-                if (question.correctAnswerIndex === answerIdx) {
-                    question.correctAnswerIndex = 0;
-                } else if (question.correctAnswerIndex > answerIdx) {
-                    question.correctAnswerIndex--;
+                if (question.right_answer === answerIdx) {
+                    question.right_answer = 0;
+                } else if (question.right_answer > answerIdx) {
+                    question.right_answer--;
                 }
             },
             addQuestion () {
