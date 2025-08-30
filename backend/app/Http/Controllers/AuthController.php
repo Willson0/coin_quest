@@ -12,6 +12,7 @@ use App\Models\NewsCategory;
 use App\Models\Tournament;
 use App\Models\User;
 use App\Models\UserLesson;
+use App\Models\WhiteList;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -22,6 +23,10 @@ class AuthController extends Controller
 {
     public function profile (Request $request) {
         $user = User::where("telegram_id", $request["initData"]["user"]["id"])->first();
+
+        if (!WhiteList::where("value", $user->telegram_id)
+            ->orWhere("value", $user->username)->exists()) abort(423, "Not whitelisted");
+
         if (!$user) {
             $alphabet = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
             $address = 'D';

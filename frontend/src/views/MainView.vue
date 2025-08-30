@@ -2,7 +2,7 @@
 import NavComponent from "@/components/NavComponent.vue";
 import axios from 'axios';
 import config from "@/config.json"
-import {endLoading, toLink} from "@/utils.js";
+import {endLoading, notify, toLink} from "@/utils.js";
 import ProfileView from "@/views/ProfileView.vue";
 import CoursesView from "@/views/CoursesView.vue";
 import TournamentView from "@/views/TournamentView.vue";
@@ -32,6 +32,7 @@ export default {
             isGoingBack: false,
             firstLoading: true,
             touch: false,
+            notWhiteList: false,
         }
     },
     components: {
@@ -185,8 +186,13 @@ export default {
 
                 this.$store.dispatch("updateUser", user);
             }).catch((error) => {
-                document.querySelector(".unreg").style.display = "flex";
-                endLoading();
+                if (error.response.status === 423) {
+                    notify ("Доступ запрещен. Вы не находитесь в белом списке", 1);
+                    return this.notWhiteList = true;
+                } else {
+                    document.querySelector(".unreg").style.display = "flex";
+                    endLoading();
+                }
             }).finally(() => {
             });
         },
@@ -237,7 +243,10 @@ export default {
 
 <template>
     <div class="notification_container"></div>
-    <div class="loading"><div>Добрый день, {{name}}</div></div>
+    <div class="loading">
+        <div v-if="!notWhiteList">Добрый день, {{name}}</div>
+        <div v-else>Вы не состоите<br>в белом списке</div>
+    </div>
     <div class="notification_container"></div>
     <lesson-view v-if="$route.query.s === 'lesson'" />
     <send-view v-else-if="$route.query.s === 'send'" />

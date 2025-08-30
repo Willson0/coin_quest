@@ -115,6 +115,12 @@ Route::group(["prefix" => "api"], function () {
             Route::get('/{support}/close', [AdminController::class, 'supportClose']);
             Route::post('/{support}/send', [AdminController::class, 'supportSend']);
         });
+        Route::prefix('whitelist')->group(function () {
+            Route::get('/', [AdminController::class, 'whitelist']);
+            Route::post('/', [AdminController::class, 'addWhitelist']);
+            Route::post('{whitelist}', [AdminController::class, 'updateWhitelist']);
+            Route::delete('{whitelist}', [AdminController::class, 'removeWhitelist']);
+        });
     });
 
     Route::group(["prefix" => "stats", "middleware" => CheckAdminMiddleware::class], function () {

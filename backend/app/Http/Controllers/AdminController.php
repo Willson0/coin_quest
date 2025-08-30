@@ -33,6 +33,7 @@ use App\Models\Picture;
 use App\Models\Support;
 use App\Models\Tournament;
 use App\Models\User;
+use App\Models\WhiteList;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -560,5 +561,30 @@ class AdminController extends Controller
 
         Order::create($validate);
         return $this->orders();
+    }
+
+    public function whitelist (Request $request) {
+        return Whitelist::all();
+    }
+
+    public function removeWhitelist (WhiteList $whitelist, Request $request) {
+        $whitelist->delete();
+        return $this->whitelist($request);
+    }
+
+    public function updateWhitelist (WhiteList $whitelist, Request $request) {
+        if (!$request->has("value")) abort (400, "Не указано значение");
+        $whitelist->update([
+            "value" => $request->value
+        ]);
+        return $this->whitelist($request);
+    }
+
+    public function addWhitelist (Request $request) {
+        if (!$request->has("value")) abort (400, "Не указано значение");
+        WhiteList::create([
+            "value" => $request->value
+        ]);
+        return $this->whitelist($request);
     }
 }

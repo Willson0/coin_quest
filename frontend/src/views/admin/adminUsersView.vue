@@ -153,6 +153,7 @@ export default {
                 <div class="admin_users_main_header_search">
                     <input @input="fetchproducts()" v-model="search" placeholder="Искать по имени" type="text">
                 </div>
+                <div style="height: 100%; display: flex; margin: auto 0; padding: 10px 20px; cursor: pointer; background-color: #389466; border-radius: 10px;" @click="$router.push('/admin/whitelist')">Вайт-лист</div>
                 <div class="admin_users_main_header_buttons">
                     <div class="admin_users_main_header_buttons_sort">
                         <div @click="showsort()" class="admin_users_main_header_buttons_el_title">

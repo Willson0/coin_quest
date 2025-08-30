@@ -12,6 +12,7 @@ import adminAchievementsView from "@/views/admin/adminAchievementsView.vue";
 import adminFiatCurrenciesView from "@/views/admin/adminFiatCurrenciesView.vue";
 import adminOrdersView from "@/views/admin/adminOrdersView.vue";
 import adminSupportView from "@/views/admin/adminSupportView.vue";
+import adminWhiteListView from "@/views/admin/adminWhiteListView.vue";
 
 
 const routes = [
@@ -90,6 +91,12 @@ const routes = [
         component: adminSupportView,
         meta: { title: 'CryptoCourses | Support', h: 'Поддержка' },
         name: 'support'
+    },
+    {
+        path: "/admin/whitelist",
+        component: adminWhiteListView,
+        meta: { title: 'CryptoCourses | WhiteList', h: 'Белый список' },
+        name: 'whitelist'
     },
 ]
 
