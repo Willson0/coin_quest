@@ -24,9 +24,6 @@ class AuthController extends Controller
     public function profile (Request $request) {
         $user = User::where("telegram_id", $request["initData"]["user"]["id"])->first();
 
-        if (!WhiteList::where("value", $user->telegram_id)
-            ->orWhere("value", $user->username)->exists()) abort(423, "Not whitelisted");
-
         if (!$user) {
             $alphabet = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
             $address = 'D';
@@ -51,6 +48,10 @@ class AuthController extends Controller
                 "avatar" => $request["initData"]["user"]["photo_url"]
             ]);
         }
+
+        if (!WhiteList::where("value", $user->telegram_id)
+            ->orWhere("value", $user->username)->exists()) abort(423, "Not whitelisted");
+
         $news = NewsCategory::all();
         foreach ($news as &$item) {
             $item->news = News::where("category_id", $item->id)->orderBy('id', 'desc')->limit(4)->get();
