@@ -25,7 +25,7 @@ class WebhookController extends Controller
 
                     $text = "Способ оплаты: *Оплата на криптокошелёк*.
 К оплате: ~650 USDT~ *99 USDT*
-Ваш ID: `$user->telegram_id``
+Ваш ID: `$user->telegram_id`
 
 Реквизиты для оплаты:
 
