@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\SendPaymentMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Telegram\Bot\FileUpload\InputFile;
@@ -60,6 +61,7 @@ CoinQuest — Это путешествие в мир трейдинга, где
                         ]
                     ])
                 ]);
+                SendPaymentMessage::dispatch($chatId)->delay(now()->addSeconds(30));
             }
         }
 
