@@ -136,7 +136,7 @@ class utils
 
         if ($deleteMarkup)
             Http::post($editurl, [
-                "chat_id" => $user->telegram_id,
+                "chat_id" => $user,
                 "message_id" => $request["callback_query"]["message"]["message_id"],
                 "reply_markup" => [
                     "inline_keyboard" => [[]],

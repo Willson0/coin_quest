@@ -17,15 +17,15 @@ class WebhookController extends Controller
 
         if (isset($update['callback_query'])) {
             $requestUser = $request->callback_query["from"];
-            $user = User::where("telegram_id", "=", $requestUser["id"])->first();
+            $chatId = $requestUser["id"];
 
             if (isset($request["callback_query"]["data"])) {
                 if ($request["callback_query"]["data"] == "get_payment") {
-                    utils::answerData("Успешно", $request, $user);
+                    utils::answerData("Успешно", $request, $requestUser["id"]);
 
                     $text = "Способ оплаты: *Оплата на криптокошелёк*.
 К оплате: ~650 USDT~ *99 USDT*
-Ваш ID: `$user->telegram_id`
+Ваш ID: `$chatId`
 
 Реквизиты для оплаты:
 
@@ -51,7 +51,7 @@ _Деньги поступят на счёт получателя._";
                     }
 
                     Telegram::sendPhoto([
-                        $user->telegram_id,
+                        "chat_id" => $chatId,
                         "photo" => InputFile::create(Storage::disk("public")->path("rep2.jpg")),
                         "caption" => $text,
                         'parse_mode' => 'MarkdownV2',
@@ -67,7 +67,7 @@ _Деньги поступят на счёт получателя._";
                     ]);
                 }
                 if ($request["callback_query"]["data"] == "payed") {
-                    utils::answerData("Успешно", $request, $user);
+                    utils::answerData("Успешно", $request, $chatId);
                     $text = "*💁🏻‍♂️ Оплатили?*
 
 👌🏻 Тогда `отправьте сюда картинкой (не документом!) квитанцию платежа: скриншот или фото.`
@@ -80,7 +80,7 @@ _Деньги поступят на счёт получателя._";
                     }
 
                     Telegram::sendMessage([
-                        $user->telegram_id,
+                        "chat_id" => $chatId,
                         "text" => $text,
                         'parse_mode' => 'MarkdownV2',
                         "reply_markup" => json_encode([
