@@ -38,6 +38,11 @@ class WebhookController extends Controller
 
 CoinQuest \\— Это путешествие в мир трейдинга, где у вас всегда есть структура, поддержка и команда рядом\\. Мы ждём вас\\!";
 
+            $escape_chars = ['_', '[', ']', '(', ')', '~', '`', '#', '+', '-', '=', '|', '{', '}', '.', '!'];
+            foreach ($escape_chars as $char) {
+                $caption = str_replace($char, '\\' . $char, $text);
+            }
+
             if (trim($text) === '/start') {
                 Telegram::sendPhoto([
                     'chat_id' => $chatId,
