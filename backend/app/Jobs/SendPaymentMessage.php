@@ -38,9 +38,10 @@ class SendPaymentMessage implements ShouldQueue
             $caption = str_replace($char, '\\' . $char, $caption);
         }
 
-        Telegram::sendMessage([
+        Telegram::sendPhoto([
             'chat_id' => $this->chatId,
-            'text'    => $caption,
+            "photo" => InputFile::create(Storage::disk("public")->path("rep1.jpg")),
+            'caption'    => $caption,
             'parse_mode' => 'MarkdownV2',
             "reply_markup" => json_encode([
                 "inline_keyboard" => [
