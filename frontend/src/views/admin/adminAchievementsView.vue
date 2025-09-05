@@ -139,7 +139,7 @@ export default {
                 placeholder="Прогресс, уроков"
             />
             <input
-                v-model.number="newAchievement.title"
+                v-model="newAchievement.title"
                 class="edit-input short"
                 type="text"
                 placeholder="Заголовок" style="width: 150px;"
@@ -174,7 +174,7 @@ export default {
             </span>
                     <input
                         v-else
-                        v-model.number="editForm.title"
+                        v-model="editForm.title"
                         type="text"
                         class="edit-input short"
                         placeholder="Title"
