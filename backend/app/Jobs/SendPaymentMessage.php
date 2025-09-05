@@ -46,7 +46,7 @@ class SendPaymentMessage implements ShouldQueue
                 "inline_keyboard" => [
                     [
                         [
-                            "text" => "Получить доступ",
+                            "text" => "Получить доступ 🔓",
                             "callback_data" => "get_payment",
                         ]
                     ]
