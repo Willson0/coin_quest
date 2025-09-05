@@ -53,9 +53,9 @@ CoinQuest — Это путешествие в мир трейдинга, где
                         "inline_keyboard" => [
                             [
                                 [
-                                    "text" => "Открыть веб-приложение",
+                                    "text" => "Вопросы и поддержка по доступу",
                                     "web_app" => [
-                                        "url" => "https://" . env("DOMAIN") . "?s=profile",
+                                        "url" => "https://t.me/" . env("USERNAME"),
                                     ]
                                 ]
                             ]
