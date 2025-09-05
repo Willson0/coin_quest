@@ -40,7 +40,7 @@ class SendPaymentMessage implements ShouldQueue
 
         Telegram::sendMessage([
             'chat_id' => $this->chatId,
-            'test'    => $caption,
+            'text'    => $caption,
             'parse_mode' => 'MarkdownV2',
             "reply_markup" => json_encode([
                 "inline_keyboard" => [
