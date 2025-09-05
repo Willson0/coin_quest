@@ -40,7 +40,7 @@ CoinQuest \\— Это путешествие в мир трейдинга, гд
 
             $escape_chars = ['_', '[', ']', '(', ')', '~', '`', '#', '+', '-', '=', '|', '{', '}', '.', '!'];
             foreach ($escape_chars as $char) {
-                $caption = str_replace($char, '\\' . $char, $text);
+                $caption = str_replace($char, '\\' . $char, $caption);
             }
 
             if (trim($text) === '/start') {
