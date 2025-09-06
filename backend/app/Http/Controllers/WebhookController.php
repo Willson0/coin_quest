@@ -175,7 +175,7 @@ CoinQuest — Это путешествие в мир трейдинга, где
                                     [
                                         "text" => "Открыть веб-приложение",
                                         "webapp" => [
-                                            "url" => "https://" . env("APP_URL")
+                                            "url" => "https://" . env("DOMAIN")
                                         ]
                                     ]
                                 ]
