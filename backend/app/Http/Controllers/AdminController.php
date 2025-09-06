@@ -611,7 +611,7 @@ class AdminController extends Controller
                         [
                             [
                                 "text" => "Открыть веб-приложение",
-                                "webapp" => [
+                                "web_app" => [
                                     "url" => "https://" . env("APP_URL")
                                 ]
                             ]
