@@ -601,24 +601,26 @@ class AdminController extends Controller
                 $caption = str_replace($char, '\\' . $char, $caption);
             }
 
-            Telegram::sendPhoto([
-                'chat_id' => $user->telegram_id,
-                'caption' => $caption,
-                'parse_mode' => 'MarkdownV2',
-                "photo" => InputFile::create(Storage::disk("public")->path("whitelist_message.jpg")),
-                "reply_markup" => json_encode([
-                    "inline_keyboard" => [
-                        [
+            try {
+                Telegram::sendPhoto([
+                    'chat_id' => $user->telegram_id,
+                    'caption' => $caption,
+                    'parse_mode' => 'MarkdownV2',
+                    "photo" => InputFile::create(Storage::disk("public")->path("whitelist_message.jpg")),
+                    "reply_markup" => json_encode([
+                        "inline_keyboard" => [
                             [
-                                "text" => "Открыть веб-приложение",
-                                "web_app" => [
-                                    "url" => "https://" . env("APP_URL")
+                                [
+                                    "text" => "Открыть веб-приложение",
+                                    "web_app" => [
+                                        "url" => "https://" . env("DOMAIN")
+                                    ]
                                 ]
                             ]
                         ]
-                    ]
-                ])
-            ]);
+                    ])
+                ]);
+            } catch (\Exception $e) {}
         }
 
         return $this->whitelist($request);
