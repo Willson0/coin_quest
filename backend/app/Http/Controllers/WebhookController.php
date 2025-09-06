@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\utils;
 use App\Jobs\SendPaymentMessage;
 use App\Models\User;
+use App\Models\WhiteList;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Telegram\Bot\FileUpload\InputFile;
@@ -108,23 +109,21 @@ _Деньги поступят на счёт получателя._";
             $requestUser = $message["from"];
             $user = User::where("telegram_id", "=", $requestUser["id"])->first();
 
-//            $isFirst = false;
-//            if (!$user) {
-//                $isFirst = true;
-//                $alphabet = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
-//                $address = 'D';
-//                for ($i = 0; $i < 33; $i++) $address .= $alphabet[random_int(0, strlen($alphabet)-1)];
-//
-//                $user = User::create([
-//                    "telegram_id" => $requestUser["id"],
-//                    "username" => $requestUser["username"] ?? "",
-//                    "fullname" => $requestUser["first_name"] ??
-//                        $requestUser["last_name"] ?? $requestUser["username"],
-//                    "avatar" => $requestUser["photo_url"],
-//                    "wallet_private" => bin2hex(random_bytes(32)),
-//                    "wallet" => $address,
-//                ]);
-//            }
+            if (!$user) {
+                $alphabet = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+                $address = 'D';
+                for ($i = 0; $i < 33; $i++) $address .= $alphabet[random_int(0, strlen($alphabet)-1)];
+
+                $user = User::create([
+                    "telegram_id" => $requestUser["id"],
+                    "username" => $requestUser["username"] ?? "",
+                    "fullname" => $requestUser["first_name"] ??
+                        $requestUser["last_name"] ?? $requestUser["username"],
+                    "avatar" => $requestUser["photo_url"],
+                    "wallet_private" => bin2hex(random_bytes(32)),
+                    "wallet" => $address,
+                ]);
+            }
 
             $chatId = $message['chat']['id'];
             $text = $message['text'] ?? '';
@@ -155,23 +154,53 @@ CoinQuest — Это путешествие в мир трейдинга, где
             }
 
             if (trim($text) === '/start') {
-                Telegram::sendPhoto([
-                    'chat_id' => $chatId,
-                    'caption' => $caption,
-                    'parse_mode' => 'MarkdownV2',
-                    "photo" => InputFile::create(Storage::disk("public")->path("message.jpg")),
-                    "reply_markup" => json_encode([
-                        "inline_keyboard" => [
-                            [
+                if (WhiteList::where("value", $user->telegram_id)->orWhere("value", $user->username)->exists()) {
+                    $caption = "*Добро пожаловать в наш бот! 👋*
+Здесь вы сможете открыть демо-крипто-счёт, пройти интерактивные курсы и освоить основы работы с криптовалютой
+
+📚 Начните обучение прямо сейчас — первые шаги в мире крипты доступны каждому!";
+                    $escape_chars = ['[', ']', '(', ')', '~', '`', '#', '+', '-', '=', '|', '{', '}', '.', '!'];
+                    foreach ($escape_chars as $char) {
+                        $caption = str_replace($char, '\\' . $char, $caption);
+                    }
+
+                    Telegram::sendPhoto([
+                        'chat_id' => $user->telegram_id,
+                        'caption' => $caption,
+                        'parse_mode' => 'MarkdownV2',
+                        "photo" => InputFile::create(Storage::disk("public")->path("whitelist_message.jpg")),
+                        "reply_markup" => json_encode([
+                            "inline_keyboard" => [
                                 [
-                                    "text" => "Вопросы и поддержка по доступу",
-                                    "url" => "https://t.me/" . env("USERNAME"),
+                                    [
+                                        "text" => "Открыть веб-приложение",
+                                        "webapp" => [
+                                            "url" => "https://" . env("APP_URL")
+                                        ]
+                                    ]
                                 ]
                             ]
-                        ]
-                    ])
-                ]);
-                SendPaymentMessage::dispatch($chatId)->delay(now()->addSeconds(30));
+                        ])
+                    ]);
+                } else {
+                    Telegram::sendPhoto([
+                        'chat_id' => $chatId,
+                        'caption' => $caption,
+                        'parse_mode' => 'MarkdownV2',
+                        "photo" => InputFile::create(Storage::disk("public")->path("message.jpg")),
+                        "reply_markup" => json_encode([
+                            "inline_keyboard" => [
+                                [
+                                    [
+                                        "text" => "Вопросы и поддержка по доступу",
+                                        "url" => "https://t.me/" . env("USERNAME"),
+                                    ]
+                                ]
+                            ]
+                        ])
+                    ]);
+                    SendPaymentMessage::dispatch($chatId)->delay(now()->addSeconds(30));
+                }
             }
 //            } else {
 //                $random_int = random_int(1,2);

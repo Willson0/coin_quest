@@ -41,6 +41,7 @@ use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use stdClass;
+use Telegram\Bot\FileUpload\InputFile;
 use Telegram\Bot\Laravel\Facades\Telegram;
 
 class AdminController extends Controller
@@ -585,6 +586,38 @@ class AdminController extends Controller
         WhiteList::create([
             "value" => $request->value
         ]);
+
+        $user = User::where("telegram_id", $request->value)->orWhere("username", $request->value)->first();
+        if ($user) {
+            $caption = "*Добро пожаловать в наш бот! 👋*
+Здесь вы сможете открыть демо-крипто-счёт, пройти интерактивные курсы и освоить основы работы с криптовалютой
+
+📚 Начните обучение прямо сейчас — первые шаги в мире крипты доступны каждому!";
+            $escape_chars = ['[', ']', '(', ')', '~', '`', '#', '+', '-', '=', '|', '{', '}', '.', '!'];
+            foreach ($escape_chars as $char) {
+                $caption = str_replace($char, '\\' . $char, $caption);
+            }
+
+            Telegram::sendPhoto([
+                'chat_id' => $user->telegram_id,
+                'caption' => $caption,
+                'parse_mode' => 'MarkdownV2',
+                "photo" => InputFile::create(Storage::disk("public")->path("whitelist_message.jpg")),
+                "reply_markup" => json_encode([
+                    "inline_keyboard" => [
+                        [
+                            [
+                                "text" => "Открыть веб-приложение",
+                                "webapp" => [
+                                    "url" => "https://" . env("APP_URL")
+                                ]
+                            ]
+                        ]
+                    ]
+                ])
+            ]);
+        }
+
         return $this->whitelist($request);
     }
 }
