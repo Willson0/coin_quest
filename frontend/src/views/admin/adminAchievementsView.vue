@@ -19,12 +19,14 @@ export default {
                 image: '',
                 progress: 0,
                 title: "",
+                type: "",
             },
             newAchievement: {
                 image: null,    // Сохраняем сам файл
                 preview: '',    // Сюда положим base64-картинку для превью
                 progress: 0,
                 title: "",
+                type: "lessons"
             },
             config: config,
         };
@@ -56,6 +58,10 @@ export default {
             if (this.editForm.file) fd.append('image', this.editForm.file);
             fd.append('progress', this.editForm.progress);
             fd.append('title', this.editForm.title);
+            fd.append('type', this.editForm.type);
+
+            if (["tournament", "channel"].includes(this.editForm.type))
+                if (!isNaN(Number(this.editForm.progress))) alert("Прогресс должен быть числом!");
 
             await axios.post(config.backend + 'admin/achievements/' + idx, fd, {withCredentials: true}).then((response) => {
                 this.achievements = response.data;
@@ -107,6 +113,10 @@ export default {
             fd.append('image', this.newAchievement.image);
             fd.append('progress', this.newAchievement.progress);
             fd.append('title', this.newAchievement.title);
+            fd.append('type', this.newAchievement.type);
+
+            if (["tournament", "channel"].includes(this.newAchievement.type))
+                if (isNaN(Number(this.newAchievement.progress))) return alert("Прогресс должен быть числом!");
 
             await axios.post(config.backend + 'admin/achievements', fd, {withCredentials: true}).then((response) => {
                 this.achievements = response.data;
@@ -114,6 +124,7 @@ export default {
                 this.newAchievement.image = null;
                 this.newAchievement.preview = '';
                 this.newAchievement.progress = 0;
+                this.newAchievement.type = "lessons";
             });
         }
     }
@@ -131,19 +142,22 @@ export default {
             />
             <img v-if="newAchievement.preview" :src="newAchievement.preview" class="achievement-image preview" alt="Превью" />
             <input
-                v-model.number="newAchievement.progress"
-                class="edit-input short"
-                type="number"
-                min="0"
-                max="100"
-                placeholder="Прогресс, уроков"
-            />
-            <input
                 v-model="newAchievement.title"
                 class="edit-input short"
                 type="text"
                 placeholder="Заголовок" style="width: 150px;"
             />
+            <input
+                v-model="newAchievement.progress"
+                class="edit-input short"
+                type="text"
+                placeholder="Прогресс, уроков"
+            />
+            <select v-model="newAchievement.type" name="" id="">
+                <option value="lessons">шт. уроков</option>
+                <option value="channel">@username канала</option>
+                <option value="tournament">id турнира</option>
+            </select>
             <button class="save-btn" @click="addAchievement">Добавить</button>
         </div>
         <table class="achievement-table">
@@ -183,16 +197,22 @@ export default {
                 </td>
                 <td>
             <span v-if="!isEditing(idx)">
-              {{ achievement.progress }} уроков
+              {{ achievement.progress }} {{ achievement.type === 'lessons' ? 'уроков' : achievement.type === 'channel' ? 'канал' : 'турнир' }}
             </span>
-                    <input
-                        v-else
-                        v-model.number="editForm.progress"
-                        type="number"
-                        min="0"
-                        class="edit-input short"
-                        placeholder="Progress"
-                    />
+                    <template v-else>
+                        <input
+                            v-model.number="editForm.progress"
+                            type="text"
+                            min="0"
+                            class="edit-input short"
+                            placeholder="Progress"
+                        />
+                        <select v-model="editForm.type" name="" id="">
+                            <option value="lessons">шт. уроков</option>
+                            <option value="channel">@username канала</option>
+                            <option value="tournament">id турнира</option>
+                        </select>
+                    </template>
                 </td>
                 <td>
                     <div v-if="!isEditing(idx)" class="action-buttons">
@@ -359,6 +379,9 @@ export default {
 .add-form .save-btn {
     font-size: 1rem;
     padding: 8px 16px;
+}
+select option {
+    color: grey;
 }
 .file-input {
     background: #232336;

@@ -13,6 +13,7 @@ export default {
         return {
             tournaments: [],
             lessons: [],
+            exams: [],
             modalOpened: false,
             editMode: false,
             form: {
@@ -41,6 +42,7 @@ export default {
             }).then((response) => {
                 this.tournaments = response.data.tournaments;
                 this.lessons = response.data.lessons;
+                this.exams = response.data.exams;
                 removeLoading();
             });
         },
@@ -177,6 +179,7 @@ export default {
                         <select v-model="form.type">
                             <option value="time">По времени</option>
                             <option value="lesson">По уроку</option>
+                            <option value="exam">По экзамену</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -194,6 +197,17 @@ export default {
                         <label>Урок</label>
                         <select v-model="form.object_id">
                             <option :value="lesson.id" v-for="lesson in lessons" :key="lesson.id">
+                                {{ lesson.title }}
+                            </option>
+                        </select>
+                    </div>
+                    <div
+                        class="form-group"
+                        v-if="form.type === 'exam'"
+                    >
+                        <label>Экзамен</label>
+                        <select v-model="form.object_id">
+                            <option :value="lesson.id" v-for="lesson in exams" :key="lesson.id">
                                 {{ lesson.title }}
                             </option>
                         </select>

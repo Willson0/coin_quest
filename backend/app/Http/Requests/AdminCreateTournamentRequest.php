@@ -24,7 +24,7 @@ class AdminCreateTournamentRequest extends FormRequest
         return [
             "date_start" => "required|date",
             "date_end" => "required|date",
-            "type" => "required|in:lesson,time",
+            "type" => "required|in:lesson,time,exam",
             "object_id" => "nullable",
             "name" => "required|string",
         ];

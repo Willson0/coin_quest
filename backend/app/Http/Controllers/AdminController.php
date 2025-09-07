@@ -322,8 +322,9 @@ class AdminController extends Controller
     public function tournaments () {
         $tournaments = Tournament::all();
         $lessons = Course::all();
+        $exams = Lesson::where("count_tries", ">", 0)->get();
 
-        return response()->json(["tournaments" => $tournaments, "lessons" => $lessons]);
+        return response()->json(["tournaments" => $tournaments, "lessons" => $lessons, "exams" => $exams]);
     }
 
     public function deleteTournament (Tournament $tournament, Request $request) {
@@ -376,6 +377,10 @@ class AdminController extends Controller
 
     public function updateAchievement (Achievements $achievement, AdminUpdateAchievementRequest $request) {
         $validate = $request->validated();
+        if ($validate["type"] === "lessons" && $validate["progress"] < 0) abort(400, "Прогресс не может быть меньше 0");
+        if ($validate["type"] === "channel" && $validate["progress"][0] != '@') abort(400, "Телеграм канал должен начинаться с символа @");
+        if ($validate["type"] === "tournament" && !Tournament::where("id", $validate["progress"])->exists()) abort(400, "Такого турнира не существует");
+
         if ($request->has("image")) {
             Storage::disk("public")->delete($achievement->image);
 
@@ -397,6 +402,10 @@ class AdminController extends Controller
 
     public function createAchievement (AdminCreateAchievementRequest $request) {
         $validate = $request->validated();
+
+        if ($validate["type"] === "lessons" && $validate["progress"] < 0) abort(400, "Прогресс не может быть меньше 0");
+        if ($validate["type"] === "channel" && $validate["progress"][0] != '@') abort(400, "Телеграм канал должен начинаться с символа @");
+        if ($validate["type"] === "tournament" && !Tournament::where("id", $validate["progress"])->exists()) abort(400, "Такого турнира не существует");
 
         $picture = $request->file("image");
         $time = time();

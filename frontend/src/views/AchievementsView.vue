@@ -81,6 +81,11 @@ export default {
         share (id) {
             copy(`https://t.me/${config.bot}?startapp=achievement_${id}`);
             return this.isTooltip = 0;
+        },
+        hasAchievement (achievement) {
+            if (achievement.type === 'lessons') return this.countLesson >= achievement.progress
+            else if (achievement.type === 'channel') return this.user.channels.includes(achievement.progress)
+            else if (achievement.type === "tournament") return this.user.wonTournaments.includes(Number(achievement.progress))
         }
     },
     computed: {
@@ -102,7 +107,7 @@ export default {
 
             let achievements = this.user.achievements;
             if (this.sharingId) achievements = achievements.filter((ach) => ach.id === this.sharingId);
-            else achievements = achievements.filter((ach) => this.countLesson >= ach.progress);
+            else achievements = achievements.filter((ach) => this.hasAchievement(ach));
             return achievements.sort((a, b) => this.isAsc ? a.id - b.id : b.id - a.id)
         }
     }
@@ -136,7 +141,9 @@ export default {
                             <path d="M3.32861 6.54267L9.45728 12.6713L10.5886 11.54L10.3266 9.01533L13.9999 5.9L10.0999 2L6.98395 5.67333L4.45995 5.41133L3.32861 6.54267Z" fill="#B963FF" stroke="#B963FF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </div>
-                    <div class="achievements_main_info_description">Пройдите {{ ach.progress }} {{ getRussianLesson(ach.progress) }}</div>
+                    <div class="achievements_main_info_description" v-if="ach.type === 'lessons'">Пройдите {{ ach.progress }} {{ getRussianLesson(ach.progress) }}</div>
+                    <div class="achievements_main_info_description" v-else-if="ach.type === 'channel'">Подпишитесь на <a :href="'https://t.me/' + ach.progress.slice(1)">{{ ach.progress }}</a></div>
+                    <div class="achievements_main_info_description" v-else-if="ach.type === 'tournament'">Победите в турнире</div>
                 </div>
                 <svg v-if="!sharingId" @click="showTooltip($event, ach.id)" xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36" fill="none">
                     <circle cx="10" cy="18" r="2" fill="#1E1E22"/>

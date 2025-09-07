@@ -26,6 +26,22 @@ export default {
         back () {
             this.isFullMode = false;
         },
+        toObjectClosest () {
+            if (this.closestTournament.type === 'lesson') {
+                if (this.user.courses.find(c => c.id === this.closestTournament.object.required_course)?.progress < 100) return null
+                else return toLink('theme', this.closestTournament.object_id)
+            } else if (this.closestTournament.type === 'exam') {
+                let course = this.user.courses.find(c => c.id === this.closestTournament.object.course_id);
+                console.log(this.closestTournament.object);
+                if (course.required_course && this.user.courses.find(c => c.id === course.required_course)?.progress < 100) return null;
+                if (this.closestTournament.object.number !== 1 && (() => {
+                    const prev = course.lessons?.find(lesson => lesson.number === this.closestTournament.object.number - 1);
+                    if (prev.count_tries > 0) return prev.user_points < 50;
+                    else return !prev.user_points;
+                })()) return null;
+                else toLink('lesson', this.closestTournament.object.id);
+            }
+        }
     },
     computed: {
         avatar () {
@@ -63,7 +79,10 @@ export default {
 
             if (!close) return;
 
-            if (close.object_id !== 0) close.object = this.user.courses.find((item) => item.id === close.object_id);
+            if (close.type === 'lesson' && close.object_id !== 0) close.object = this.user.courses.find((item) => item.id === close.object_id);
+            else if (close.type === 'exam' && close.object_id !== 0) close.object = this.user.courses
+                .flatMap(course => course.lessons)
+                .filter(lesson => lesson.id === close.object_id)[0];
             return close;
         },
         getTournamentDate () {
@@ -210,10 +229,10 @@ export default {
                 </div>
             </div>
             <div v-else-if="closestTournament" :style="{'cursor': user.courses.find(c => c.id === closestTournament.object.required_course)?.progress < 100 ? 'not-allowed' : 'pointer'}"
-                 @click="user.courses.find(c => c.id === closestTournament.object.required_course)?.progress < 100 ? null : toLink('theme', closestTournament.object_id)" class="tournament_closest_lesson">
+                 @click="toObjectClosest" class="tournament_closest_lesson">
                 <div class="tournament_closest_lesson_info">
                     <div class="tournament_closest_lesson_info_title">{{ closestTournament.object.title }}</div>
-                    <div class="tournament_closest_lesson_info_level_container">
+                    <div class="tournament_closest_lesson_info_level_container" v-if="closestTournament.type === 'lesson'">
                         <div class="tournament_closest_lesson_info_level_container_count">{{ closestTournament.object.lessons.length }} {{ getRussianLesson(closestTournament.object.lessons.length) }}</div>
                         <div class="tournament_closest_lesson_info_level_container_level">{{ user.levels[closestTournament.object.level] }}</div>
                     </div>

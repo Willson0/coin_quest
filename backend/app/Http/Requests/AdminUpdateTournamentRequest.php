@@ -24,7 +24,7 @@ class AdminUpdateTournamentRequest extends FormRequest
         return [
             "date_start" => "date",
             "date_end" => "date",
-            "type" => "nullable|in:lesson,time",
+            "type" => "nullable|in:lesson,time,exam",
             "object_id" => "nullable",
             "name" => "nullable|string",
         ];

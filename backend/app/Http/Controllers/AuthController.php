@@ -18,6 +18,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Telegram\Bot\Laravel\Facades\Telegram;
 
 class AuthController extends Controller
 {
@@ -68,7 +70,7 @@ class AuthController extends Controller
                     $join->on('lessons.id', '=', 'user_lessons.lesson_id')
                         ->where('user_lessons.user_id', '=', $user->id);
                 })
-                ->select('lessons.id', 'lessons.title', 'lessons.description', "lessons.count_tries", 'lessons.number', 'user_lessons.id as user_lesson_id', 'user_lessons.points as user_points')
+                ->select('lessons.id', 'lessons.title', 'lessons.description', "lessons.count_tries", 'lessons.number', 'lessons.course_id', 'user_lessons.id as user_lesson_id', 'user_lessons.points as user_points')
                 ->orderBy('lessons.number')
                 ->get()
                 ->groupBy('id')
@@ -101,6 +103,10 @@ class AuthController extends Controller
 
             if ($user->tournament->type === 'lesson') {
                 $inArray = Lesson::where("course_id", $user->tournament->object_id)->pluck('id')->toArray();
+                if (count($inArray) > 0)
+                    $sql .= " where lesson_id in (".implode(',', $inArray).")";
+            } else if ($user->tournament->type === 'exam') {
+                $inArray = Lesson::where("id", $user->tournament->object_id)->pluck('id')->toArray();
                 if (count($inArray) > 0)
                     $sql .= " where lesson_id in (".implode(',', $inArray).")";
             }
@@ -154,6 +160,70 @@ class AuthController extends Controller
         $user->achievements = Achievements::all();
 
         $user->pinned_achievements = json_decode($user->pinned_achievements, true);
+
+        $inChannels = [];
+        $chats = Achievements::where("type", "channel")->pluck("progress")->toArray();
+        foreach ($chats as $chat_id) {
+            try {
+                $result = Telegram::getChatMember([
+                    'chat_id' => $chat_id,
+                    'user_id' => $user->telegram_id,
+                ]);
+                Log::critical($result);
+
+                $status = $result->get('status');
+                if (in_array($status, ['creator', 'administrator', 'member']))
+                    $inChannels[] = $chat_id;
+            } catch (\Telegram\Bot\Exceptions\TelegramResponseException $e) {}
+        }
+        $user->channels = $inChannels;
+
+        $achievementsTournaments = Achievements::where("type", "tournament")->pluck("progress")->toArray();
+        $achievementsTournaments = Tournament::whereIn("id", $achievementsTournaments)
+            ->where("date_end", "<", Carbon::now())->get();
+        $winners = Cache::get('tournament_winners', []);
+        foreach ($achievementsTournaments as $tournament) {
+            if (isset($winners[$tournament->id]) && $winners[$tournament->id]) continue;
+            try {
+                $sql = "
+                    select
+                        user_id,
+                        lesson_id,
+                        points,
+                        row_number() over (
+                            partition by user_id, lesson_id
+                            order by created_at desc, id desc
+                        ) as rn
+                    from user_lessons
+                ";
+
+                if ($tournament->type === 'lesson') {
+                    $inArray = Lesson::where("course_id", $user->tournament->object_id)->pluck('id')->toArray();
+                    if ($inArray)
+                        $sql .= " where lesson_id in (" . implode(',', $inArray) . ")";
+                } else if ($tournament->type === 'exam') {
+                    $inArray = Lesson::where("id", $user->tournament->object_id)->pluck('id')->toArray();
+                    if ($inArray)
+                        $sql .= " where lesson_id in (" . implode(',', $inArray) . ")";
+                } else {
+                    $sql .= " where created_at between '{$user->tournament->date_start}' and '{$user->tournament->date_end}'";
+                }
+
+                $firstUserId = DB::table(DB::raw("($sql) t"))
+                    ->join('users as u', 'u.id', '=', 't.user_id')
+                    ->where('t.rn', 1)
+                    ->selectRaw('u.id as user_id, SUM(t.points) as points')
+                    ->groupBy('u.id')
+                    ->orderByDesc('points')
+                    ->limit(1)
+                    ->value('user_id');
+
+                $winners["$tournament->id"] = $firstUserId;
+            } catch (\Exception $e) {}
+        }
+        Cache::forever('tournament_winners', $winners);
+        $userWinners = array_filter($winners, fn($winnerId) => $winnerId == $user->id);
+        $user->wonTournaments = array_keys($userWinners);
 
         return response()->json($user);
     }

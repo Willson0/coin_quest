@@ -1090,7 +1090,8 @@ input[type="number"] {
     box-shadow: 0 0 6px 0 rgba(74, 74, 74, 0.1);
     outline: 1px solid var(--main);
 }
-.trade>button {
+.trade>button,
+.profile_sup {
     margin-top: auto;
     /*margin-bottom: 24px;*/
     border-radius: 18px;
@@ -1888,6 +1889,7 @@ input[type="number"] {
     -webkit-border-radius: 2px;
     -moz-border-radius: 2px;
     border-radius: 2px;
+    object-fit: cover;
 }
 .achievements_main_info {
     margin: auto 16px;

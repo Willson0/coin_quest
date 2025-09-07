@@ -82,9 +82,13 @@ export default {
                 <lesson-component v-for="les in course.lessons" :lesson="les"
                                   :is-locked="les.number !== 1 && (() => {
                                         const prev = course.lessons?.find(lesson => lesson.number === les.number - 1);
-                                        if (!prev) return true;
-                                        if (!(prev.count_tries > 0)) return false;
-                                        return prev.user_points < 50;
+                                        if (prev.count_tries > 0) {
+                                            if (prev.user_points >= 50) return false;
+                                            else return true;
+                                        } else {
+                                            if (!prev.user_points) return true;
+                                            return false;
+                                        }
                                     })()"
                 />
             </div>
