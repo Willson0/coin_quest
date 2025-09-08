@@ -51,21 +51,23 @@ _Деньги поступят на счёт получателя._";
                         $text = str_replace($char, '\\' . $char, $text);
                     }
 
-                    Telegram::sendPhoto([
-                        "chat_id" => $chatId,
-                        "photo" => InputFile::create(Storage::disk("public")->path("rep2.jpg")),
-                        "caption" => $text,
-                        'parse_mode' => 'MarkdownV2',
-                        "reply_markup" => json_encode([
-                        "inline_keyboard" => [
-                            [
+                    try {
+                        Telegram::sendPhoto([
+                            "chat_id" => $chatId,
+                            "photo" => InputFile::create(Storage::disk("public")->path("rep2.jpg")),
+                            "caption" => $text,
+                            'parse_mode' => 'MarkdownV2',
+                            "reply_markup" => json_encode([
+                            "inline_keyboard" => [
                                 [
-                                    "text" => "Оплачено",
-                                    "callback_data" => "payed",
+                                    [
+                                        "text" => "Оплачено",
+                                        "callback_data" => "payed",
+                                    ]
                                 ]
-                            ]
-                        ]])
-                    ]);
+                            ]])
+                        ]);
+                    } catch (\Exception $e) {}
                 }
                 if ($request["callback_query"]["data"] == "payed") {
                     utils::answerData("Успешно", $request, $chatId);
@@ -80,25 +82,27 @@ _Деньги поступят на счёт получателя._";
                         $text = str_replace($char, '\\' . $char, $text);
                     }
 
-                    Telegram::sendMessage([
-                        "chat_id" => $chatId,
-                        "text" => $text,
-                        'parse_mode' => 'MarkdownV2',
-                        "reply_markup" => json_encode([
-                            "inline_keyboard" => [
-                                [
+                    try {
+                        Telegram::sendMessage([
+                            "chat_id" => $chatId,
+                            "text" => $text,
+                            'parse_mode' => 'MarkdownV2',
+                            "reply_markup" => json_encode([
+                                "inline_keyboard" => [
                                     [
-                                        "text" => "Прислать квитанцию",
-                                        "url" => "https://t.me/" . env("USERNAME"),
-                                    ],
-                                ],[
-                                    [
-                                        "text" => "Назад",
-                                        "callback_data" => "get_payment",
+                                        [
+                                            "text" => "Прислать квитанцию",
+                                            "url" => "https://t.me/" . env("USERNAME"),
+                                        ],
+                                    ],[
+                                        [
+                                            "text" => "Назад",
+                                            "callback_data" => "get_payment",
+                                        ]
                                     ]
-                                ]
-                            ]])
-                    ]);
+                                ]])
+                        ]);
+                    } catch (\Exception $e) {}
                 }
             }
         }
@@ -119,7 +123,7 @@ _Деньги поступят на счёт получателя._";
                     "username" => $requestUser["username"] ?? "",
                     "fullname" => $requestUser["first_name"] ??
                         $requestUser["last_name"] ?? $requestUser["username"],
-                    "avatar" => $requestUser["photo_url"],
+                    "avatar" => $requestUser["photo_url"] ?? "",
                     "wallet_private" => bin2hex(random_bytes(32)),
                     "wallet" => $address,
                 ]);
@@ -164,41 +168,45 @@ CoinQuest — Это путешествие в мир трейдинга, где
                         $caption = str_replace($char, '\\' . $char, $caption);
                     }
 
-                    Telegram::sendPhoto([
-                        'chat_id' => $user->telegram_id,
-                        'caption' => $caption,
-                        'parse_mode' => 'MarkdownV2',
-                        "photo" => InputFile::create(Storage::disk("public")->path("whitelist_message.jpg")),
-                        "reply_markup" => json_encode([
-                            "inline_keyboard" => [
-                                [
+                    try {
+                        Telegram::sendPhoto([
+                            'chat_id' => $user->telegram_id,
+                            'caption' => $caption,
+                            'parse_mode' => 'MarkdownV2',
+                            "photo" => InputFile::create(Storage::disk("public")->path("whitelist_message.jpg")),
+                            "reply_markup" => json_encode([
+                                "inline_keyboard" => [
                                     [
-                                        "text" => "Открыть веб-приложение",
-                                        "web_app" => [
-                                            "url" => "https://" . env("DOMAIN")
+                                        [
+                                            "text" => "Открыть веб-приложение",
+                                            "web_app" => [
+                                                "url" => "https://" . env("DOMAIN")
+                                            ]
                                         ]
                                     ]
                                 ]
-                            ]
-                        ])
-                    ]);
+                            ])
+                        ]);
+                    } catch (\Exception $e) {}
                 } else {
-                    Telegram::sendPhoto([
-                        'chat_id' => $chatId,
-                        'caption' => $caption,
-                        'parse_mode' => 'MarkdownV2',
-                        "photo" => InputFile::create(Storage::disk("public")->path("message.jpg")),
-                        "reply_markup" => json_encode([
-                            "inline_keyboard" => [
-                                [
+                    try {
+                        Telegram::sendPhoto([
+                            'chat_id' => $chatId,
+                            'caption' => $caption,
+                            'parse_mode' => 'MarkdownV2',
+                            "photo" => InputFile::create(Storage::disk("public")->path("message.jpg")),
+                            "reply_markup" => json_encode([
+                                "inline_keyboard" => [
                                     [
-                                        "text" => "Вопросы и поддержка по доступу",
-                                        "url" => "https://t.me/" . env("USERNAME"),
+                                        [
+                                            "text" => "Вопросы и поддержка по доступу",
+                                            "url" => "https://t.me/" . env("USERNAME"),
+                                        ]
                                     ]
                                 ]
-                            ]
-                        ])
-                    ]);
+                            ])
+                        ]);
+                    } catch (\Exception $e) {}
                     SendPaymentMessage::dispatch($chatId)->delay(now()->addSeconds(30));
                 }
             }

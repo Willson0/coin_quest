@@ -38,21 +38,23 @@ class SendPaymentMessage implements ShouldQueue
             $caption = str_replace($char, '\\' . $char, $caption);
         }
 
-        Telegram::sendPhoto([
-            'chat_id' => $this->chatId,
-            "photo" => InputFile::create(Storage::disk("public")->path("rep1.jpg")),
-            'caption'    => $caption,
-            'parse_mode' => 'MarkdownV2',
-            "reply_markup" => json_encode([
-                "inline_keyboard" => [
-                    [
+        try {
+            Telegram::sendPhoto([
+                'chat_id' => $this->chatId,
+                "photo" => InputFile::create(Storage::disk("public")->path("rep1.jpg")),
+                'caption'    => $caption,
+                'parse_mode' => 'MarkdownV2',
+                "reply_markup" => json_encode([
+                    "inline_keyboard" => [
                         [
-                            "text" => "Получить доступ 🔓",
-                            "callback_data" => "get_payment",
+                            [
+                                "text" => "Получить доступ 🔓",
+                                "callback_data" => "get_payment",
+                            ]
                         ]
                     ]
-                ]
-            ])
-        ]);
+                ])
+            ]);
+        } catch (\Exception $e) {}
     }
 }
