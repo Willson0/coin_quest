@@ -81,8 +81,12 @@ export default {
             return counter;
         },
         unpinnedAchievements () {
-            if (!this.countLesson) return;
+            if (!this.countLesson || !this.user.pinned_achievements) return;
             let countPinned = this.user.achievements?.filter(ach => this.hasAchievement(ach) && this.user.pinned_achievements?.includes(ach.id))?.length ?? 0;
+
+            console.log(countPinned);
+            console.log(this.user.achievements?.filter(ach => this.hasAchievement(ach) && this.user.pinned_achievements?.includes(ach.id)))
+
             let achs = this.user.achievements?.filter(ach => this.hasAchievement(ach) && !this.user.pinned_achievements?.includes(ach.id)).slice(0, 3 - countPinned);
             return achs;
         },
